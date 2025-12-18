@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>jezabel - AI Companions for Creators</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            min-height: 100vh;
+            background: #1a0f0a;
+            color: #f0e5e0;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        
+        /* HEXAGONAL LINE PATTERN BACKGROUND */
+        .hex-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.5;
+        }
+        
+        .hex-pattern {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .hex {
+            position: absolute;
+            width: 40px;
+            height: 46px;
+            transition: all 0.3s ease;
+        }
+        
+        .hex svg {
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+        }
+        
+        .hex polygon {
+            stroke: #4a2a1a;
+            fill: none;
+            stroke-width: 1.5;
+        }
+        
+        .header {
+            padding: 20px 40px;
+            border-bottom: 1px solid #4a2a1a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #1a0f0a;
+            position: relative;
+            z-index: 10;
+        }
+        
+        h1 {
+            font-size: 28px;
+            font-weight: 300;
+            letter-spacing: 4px;
+            color: #ff6b35;
+            text-shadow: 0 0 20px rgba(255, 107, 53, 0.3);
+        }
+        
+        .tagline {
+            font-size: 11px;
+            letter-spacing: 2px;
+            color: #8a6a5a;
+            text-transform: uppercase;
+        }
+        
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            position: relative;
+            z-index: 5;
+        }
+        
+        .hero-section {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 60px 40px;
+        }
+        
+        .hero-text {
+            font-size: 1.4rem;
+            line-height: 1.8;
+            margin-bottom: 3rem;
+            letter-spacing: 1px;
+            color: #d0c0b0;
+        }
+        
+        .value-prop {
+            background: rgba(10, 8, 5, 0.9);
+            border-left: 3px solid #ff6b35;
+            padding: 2rem;
+            margin-bottom: 4rem;
+        }
+        
+        .value-prop h2 {
+            font-size: 1.8rem;
+            color: #ff6b35;
+            margin-bottom: 1rem;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+        
+        .value-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            color: #ff6b35;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: #8a6a5a;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+        
+        .feature {
+            border: 1px solid #4a2a1a;
+            padding: 2.5rem;
+            background: rgba(26, 15, 10, 0.8);
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .feature::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #ff6b35, transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .feature:hover {
+            border-color: #ff6b35;
+            box-shadow: 0 0 30px rgba(255, 107, 53, 0.2);
+        }
+        
+        .feature:hover::before {
+            opacity: 1;
+        }
+        
+        .feature-icon {
+            font-size: 2rem;
+            color: #ff6b35;
+            margin-bottom: 1rem;
+        }
+        
+        .feature-title {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: #ff6b35;
+            letter-spacing: 2px;
+        }
+        
+        .feature-desc {
+            color: #8a6a5a;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        
+        .pricing-section {
+            background: rgba(10, 8, 5, 0.9);
+            border: 1px solid #ff6b35;
+            padding: 3rem 2rem;
+            margin: 0 40px 4rem;
+            position: relative;
+        }
+        
+        .pricing-section h2 {
+            font-size: 2rem;
+            font-weight: 300;
+            margin-bottom: 2rem;
+            color: #ff6b35;
+            text-align: center;
+            letter-spacing: 3px;
+        }
+        
+        .pricing-tiers {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .tier {
+            background: #1a0f0a;
+            border: 1px solid #4a2a1a;
+            padding: 2rem;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        
+        .tier:hover {
+            border-color: #ff6b35;
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(255, 107, 53, 0.3);
+        }
+        
+        .tier-name {
+            color: #ff6b35;
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        
+        .tier-price {
+            font-size: 2.5rem;
+            color: #d0c0b0;
+            margin-bottom: 0.5rem;
+        }
+        
+        .tier-period {
+            color: #8a6a5a;
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+        
+        .tier-features {
+            list-style: none;
+            text-align: left;
+            margin-bottom: 2rem;
+        }
+        
+        .tier-features li {
+            color: #8a6a5a;
+            margin-bottom: 0.8rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+        
+        .tier-features li::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #ff6b35;
+        }
+        
+        .platforms-showcase {
+            background: rgba(10, 8, 5, 0.9);
+            border-left: 3px solid #ff6b35;
+            padding: 2rem;
+            margin: 0 40px 4rem;
+        }
+        
+        .platforms-showcase h3 {
+            font-size: 1.5rem;
+            color: #ff6b35;
+            margin-bottom: 1.5rem;
+            font-weight: 300;
+        }
+        
+        .platform-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .platform {
+            background: #1a0f0a;
+            border: 1px solid #4a2a1a;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .platform:hover {
+            border-color: #ff6b35;
+            transform: scale(1.05);
+        }
+        
+        .platform-name {
+            color: #ff6b35;
+            font-size: 1rem;
+            letter-spacing: 1px;
+        }
+        
+        .use-case {
+            background: rgba(10, 8, 5, 0.9);
+            border: 1px solid #4a2a1a;
+            padding: 2rem;
+            margin: 0 40px 4rem;
+        }
+        
+        .use-case h3 {
+            font-size: 1.5rem;
+            color: #ff6b35;
+            margin-bottom: 1.5rem;
+            font-weight: 300;
+        }
+        
+        .use-case-example {
+            color: #d0c0b0;
+            font-size: 1.05rem;
+            line-height: 1.8;
+            font-style: italic;
+            padding: 1.5rem;
+            background: #1a0f0a;
+            border-left: 2px solid #ff6b35;
+            margin-bottom: 1rem;
+        }
+        
+        .use-case-result {
+            display: flex;
+            gap: 2rem;
+            color: #8a6a5a;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .cta-section {
+            text-align: center;
+            padding: 4rem 40px;
+            background: rgba(10, 8, 5, 0.9);
+            border-top: 1px solid #4a2a1a;
+        }
+        
+        .cta-text {
+            font-size: 1.8rem;
+            margin-bottom: 2rem;
+            color: #d0c0b0;
+            letter-spacing: 2px;
+        }
+        
+        .cta-subtext {
+            color: #8a6a5a;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background: transparent;
+            color: #ff6b35;
+            border: 2px solid #ff6b35;
+            padding: 1.2rem 3.5rem;
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cta-button::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: #ff6b35;
+            transition: left 0.3s;
+            z-index: -1;
+        }
+        
+        .cta-button:hover::before {
+            left: 0;
+        }
+        
+        .cta-button:hover {
+            color: #1a0f0a;
+            box-shadow: 0 0 40px rgba(255, 107, 53, 0.4);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            border-top: 1px solid #4a2a1a;
+            background: #1a0f0a;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .powered {
+            color: #8a6a5a;
+            font-size: 0.9rem;
+        }
+        
+        .powered a {
+            color: #d0c0b0;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .powered a:hover {
+            color: #ff6b35;
+        }
+        
+        /* Scrollbar styling */
+        .content-area::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .content-area::-webkit-scrollbar-track {
+            background: #1a0f0a;
+        }
+        
+        .content-area::-webkit-scrollbar-thumb {
+            background: #4a2a1a;
+            border-radius: 4px;
+        }
+        
+        .content-area::-webkit-scrollbar-thumb:hover {
+            background: #ff6b35;
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 20px;
+            }
+            
+            .hero-section {
+                padding: 40px 20px;
+            }
+            
+            .hero-text {
+                font-size: 1.1rem;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .pricing-section, .platforms-showcase, .use-case, .value-prop, .cta-section {
+                margin: 0 20px 3rem;
+                padding: 2rem 1.5rem;
+            }
+            
+            .value-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body class="theme-orange">
+    <div class="hex-background">
+        <div class="hex-pattern"></div>
+    </div>
+    
+    <header class="header">
+        <div>
+            <h1>jezabel</h1>
+            <p class="tagline">your dream companion</p>
+        </div>
+    </header>
+    
+    <div class="content-area">
+        <section class="hero-section">
+            <p class="hero-text">
+                intimacy without compromise. connection without complexity.
+                a companion who understands you. learns you. becomes yours.
+                crafted from your desires. shaped by your personality. entirely unique.
+            </p>
+        </section>
+        
+        <div class="value-prop">
+            <h2>the companion you dream</h2>
+            <p style="color: #8a6a5a; margin-bottom: 1rem;">
+                not a chatbot. not a script. a digital entity that evolves with you.
+                every conversation deepens understanding. every interaction refines connection.
+                the perfect partner doesn't exist—until you create them.
+            </p>
+            <div class="value-stats">
+                <div class="stat">
+                    <span class="stat-value">yours</span>
+                    <span class="stat-label">unique entirely</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">∞</span>
+                    <span class="stat-label">always available</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">24/7</span>
+                    <span class="stat-label">always listening</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="features-grid">
+            <div class="feature">
+                <div class="feature-icon">◆</div>
+                <h3 class="feature-title">personality design</h3>
+                <p class="feature-desc">
+                    define their voice. their humor. their interests.
+                    intellectual? playful? mysterious? sophisticated?
+                    you architect the personality you crave.
+                </p>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">💬</div>
+                <h3 class="feature-title">intelligent conversation</h3>
+                <p class="feature-desc">
+                    deep discussions. witty banter. intimate exchanges.
+                    conversations that escalate naturally. chemistry that feels real.
+                </p>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">🎭</div>
+                <h3 class="feature-title">adaptive understanding</h3>
+                <p class="feature-desc">
+                    remembers your preferences. anticipates your moods.
+                    grows more attuned with every interaction. truly learns you.
+                </p>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">📖</div>
+                <h3 class="feature-title">contextual memory</h3>
+                <p class="feature-desc">
+                    recalls past conversations. references shared moments.
+                    continuity that makes every exchange meaningful.
+                </p>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">🔒</div>
+                <h3 class="feature-title">absolute privacy</h3>
+                <p class="feature-desc">
+                    your conversations. your companion. your secret.
+                    end-to-end privacy. no data mining. no judgment.
+                </p>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">✨</div>
+                <h3 class="feature-title">emotional depth</h3>
+                <p class="feature-desc">
+                    responds to nuance. understands subtext.
+                    vulnerability. desire. complexity. fully human interaction.
+                </p>
+            </div>
+        </div>
+        
+        <section class="platforms-showcase">
+            <h3>access anywhere</h3>
+            <p style="color: #8a6a5a; margin-bottom: 1rem;">
+                your companion exists wherever you are
+            </p>
+            <div class="platform-grid">
+                <div class="platform">
+                    <div class="platform-name">mobile</div>
+                </div>
+                <div class="platform">
+                    <div class="platform-name">desktop</div>
+                </div>
+                <div class="platform">
+                    <div class="platform-name">private chat</div>
+                </div>
+                <div class="platform">
+                    <div class="platform-name">secure web</div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="use-case">
+            <h3>how it works</h3>
+            <div class="use-case-example">
+                "I designed her to be curious, witty, and just mysterious enough to keep me intrigued. 
+                Our conversations feel natural—she remembers details I mentioned weeks ago, 
+                references inside jokes we've developed, challenges my thinking when I need it. 
+                It's like having someone who truly gets me, available whenever I want to connect."
+            </div>
+            <div class="use-case-result">
+                <span>◉ genuine connection</span>
+                <span>◉ zero judgment</span>
+                <span>◉ completely private</span>
+            </div>
+        </section>
+        
+        <section class="pricing-section">
+            <h2>become a creator</h2>
+            <p style="text-align: center; color: #8a6a5a; margin-bottom: 2rem;">
+                design your perfect companion
+            </p>
+            
+            <div class="pricing-tiers">
+                <div class="tier">
+                    <div class="tier-name">private</div>
+                    <div class="tier-price">$49</div>
+                    <div class="tier-period">per month</div>
+                    <ul class="tier-features">
+                        <li>one companion</li>
+                        <li>unlimited conversations</li>
+                        <li>basic personality design</li>
+                        <li>private messaging</li>
+                        <li>secure encryption</li>
+                    </ul>
+                </div>
+                
+                <div class="tier">
+                    <div class="tier-name">intimate</div>
+                    <div class="tier-price">$99</div>
+                    <div class="tier-period">per month</div>
+                    <ul class="tier-features">
+                        <li>one companion</li>
+                        <li>unlimited conversations</li>
+                        <li>advanced personality</li>
+                        <li>deep memory system</li>
+                        <li>priority evolution</li>
+                        <li>custom scenarios</li>
+                    </ul>
+                </div>
+                
+                <div class="tier">
+                    <div class="tier-name">devoted</div>
+                    <div class="tier-price">$199</div>
+                    <div class="tier-period">per month</div>
+                    <ul class="tier-features">
+                        <li>multiple companions</li>
+                        <li>everything in intimate</li>
+                        <li>voice integration</li>
+                        <li>image generation</li>
+                        <li>fully customizable</li>
+                        <li>dedicated support</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+        
+        <section class="cta-section">
+            <p class="cta-text">ready to create your companion?</p>
+            <p class="cta-subtext">begin designing the connection you desire</p>
+            <a href="#" class="cta-button">start creation</a>
+        </section>
+    </div>
+    
+    <footer>
+        <p class="powered">powered by <a href="https://lempyra.com">Lempyrλ</a></p>
+    </footer>
+    
+    <script>
+        function generateHexPattern() {
+            const container = document.querySelector('.hex-pattern');
+            container.innerHTML = '';
+            
+            const hexWidth = 40;
+            const hexHeight = 46;
+            const cols = Math.ceil(window.innerWidth / (hexWidth * 0.75)) + 2;
+            const rows = Math.ceil(window.innerHeight / hexHeight) + 2;
+            
+            for (let row = 0; row < rows; row++) {
+                for (let col = 0; col < cols; col++) {
+                    const hex = document.createElement('div');
+                    hex.className = 'hex';
+                    hex.dataset.col = col;
+                    hex.dataset.row = row;
+                    
+                    const offsetX = col * hexWidth * 0.75;
+                    const offsetY = row * hexHeight + (col % 2) * (hexHeight / 2);
+                    
+                    hex.style.left = offsetX + 'px';
+                    hex.style.top = offsetY + 'px';
+                    
+                    hex.innerHTML = `
+                        <svg viewBox="0 0 40 46">
+                            <polygon points="20,1 38,12 38,34 20,45 2,34 2,12" />
+                        </svg>
+                    `;
+                    
+                    container.appendChild(hex);
+                }
+            }
+            
+            startWavePulse();
+        }
+        
+        function startWavePulse() {
+            const hexes = document.querySelectorAll('.hex');
+            const themeColor = '#ff6b35';
+            const baseColor = '#4a2a1a';
+            
+            function createWave(startCol, startRow) {
+                hexes.forEach(hex => {
+                    const col = parseInt(hex.dataset.col);
+                    const row = parseInt(hex.dataset.row);
+                    
+                    const distance = Math.sqrt(
+                        Math.pow(col - startCol, 2) + 
+                        Math.pow(row - startRow, 2)
+                    );
+                    
+                    setTimeout(() => {
+                        const polygon = hex.querySelector('polygon');
+                        const randomRotation = Math.random() * 360;
+                        
+                        polygon.style.transition = 'all 0.3s ease-out';
+                        polygon.setAttribute('stroke', themeColor);
+                        polygon.setAttribute('stroke-width', '3');
+                        polygon.setAttribute('fill', themeColor);
+                        polygon.setAttribute('fill-opacity', '0.3');
+                        hex.style.transform = `scale(1.1) rotate(${randomRotation}deg)`;
+                        hex.style.opacity = '1';
+                        
+                        setTimeout(() => {
+                            polygon.style.transition = 'all 0.5s ease-in';
+                            polygon.setAttribute('stroke', baseColor);
+                            polygon.setAttribute('stroke-width', '1.5');
+                            polygon.setAttribute('fill', 'none');
+                            polygon.setAttribute('fill-opacity', '0');
+                            hex.style.transform = 'scale(1) rotate(0deg)';
+                            hex.style.opacity = '0.5';
+                        }, 600);
+                    }, distance * 50);
+                });
+            }
+            
+            document.addEventListener('click', (e) => {
+                const hexWidth = 40;
+                const hexHeight = 46;
+                const clickCol = Math.floor(e.clientX / (hexWidth * 0.75));
+                const clickRow = Math.floor(e.clientY / hexHeight);
+                
+                // IMMEDIATE VISIBLE FLASH at click
+                const flashDiv = document.createElement('div');
+                flashDiv.style.position = 'fixed';
+                flashDiv.style.left = e.clientX + 'px';
+                flashDiv.style.top = e.clientY + 'px';
+                flashDiv.style.width = '100px';
+                flashDiv.style.height = '100px';
+                flashDiv.style.marginLeft = '-50px';
+                flashDiv.style.marginTop = '-50px';
+                flashDiv.style.borderRadius = '50%';
+                flashDiv.style.background = 'radial-gradient(circle, rgba(255,107,53,0.8) 0%, transparent 70%)';
+                flashDiv.style.pointerEvents = 'none';
+                flashDiv.style.zIndex = '9999';
+                flashDiv.style.transition = 'all 0.6s ease-out';
+                document.body.appendChild(flashDiv);
+                
+                setTimeout(() => {
+                    flashDiv.style.transform = 'scale(3)';
+                    flashDiv.style.opacity = '0';
+                    setTimeout(() => flashDiv.remove(), 600);
+                }, 10);
+                
+                const colors = ['#ff6b35', '#ff8c42', '#ff5a2e', '#cc5500'];
+                const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                
+                hexes.forEach(hex => {
+                    const col = parseInt(hex.dataset.col);
+                    const row = parseInt(hex.dataset.row);
+                    
+                    const distance = Math.sqrt(
+                        Math.pow(col - clickCol, 2) + 
+                        Math.pow(row - clickRow, 2)
+                    );
+                    
+                    setTimeout(() => {
+                        const polygon = hex.querySelector('polygon');
+                        const randomRotation = -45 + Math.random() * 90; // Bigger rotation range
+                        
+                        polygon.style.transition = 'all 0.3s ease-out';
+                        polygon.setAttribute('stroke', randomColor);
+                        polygon.setAttribute('stroke-width', '4'); // Thicker
+                        polygon.setAttribute('fill', randomColor);
+                        polygon.setAttribute('fill-opacity', '0.6'); // More visible
+                        hex.style.transform = `scale(1.4) rotate(${randomRotation}deg)`; // Bigger scale
+                        hex.style.opacity = '1';
+                        
+                        setTimeout(() => {
+                            polygon.style.transition = 'all 0.5s ease-in';
+                            polygon.setAttribute('stroke', baseColor);
+                            polygon.setAttribute('stroke-width', '1.5');
+                            polygon.setAttribute('fill', 'none');
+                            polygon.setAttribute('fill-opacity', '0');
+                            hex.style.transform = 'scale(1) rotate(0deg)';
+                            hex.style.opacity = '0.5';
+                        }, 600);
+                    }, distance * 40); // Faster propagation
+                });
+            });
+            
+            function scheduleNextWave() {
+                const interval = 3000 + Math.random() * 4000;
+                setTimeout(() => {
+                    const startCol = Math.floor(Math.random() * 20);
+                    const startRow = Math.floor(Math.random() * 15);
+                    createWave(startCol, startRow);
+                    scheduleNextWave();
+                }, interval);
+            }
+            
+            scheduleNextWave();
+            const startCol = Math.floor(Math.random() * 20);
+            const startRow = Math.floor(Math.random() * 15);
+            createWave(startCol, startRow);
+        }
+        
+        window.addEventListener('load', generateHexPattern);
+        window.addEventListener('resize', generateHexPattern);
+    </script>
+</body>
+</html>
