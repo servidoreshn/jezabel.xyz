@@ -367,7 +367,7 @@
 
   .companion-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 1.5rem;
     max-width: 1100px;
     margin: 0 auto;
@@ -378,7 +378,10 @@
     aspect-ratio: 3/4;
     overflow: hidden;
     cursor: pointer;
-    group: true;
+  }
+
+  .companion-card:last-child:nth-child(3n+1) {
+    grid-column: 2;
   }
 
   .companion-card .companion-bg {
@@ -955,6 +958,16 @@
       gap: 4px;
     }
 
+    .companion-card:last-child:nth-child(3n+1) {
+      grid-column: auto;
+    }
+
+    .companion-card:last-child:nth-child(odd) {
+      grid-column: 1 / -1;
+      max-width: 50%;
+      justify-self: center;
+    }
+
     .how-step {
       flex-direction: column;
       gap: 0.5rem;
@@ -1163,7 +1176,7 @@
         <li>Mensajería privada</li>
         <li>Encriptación total</li>
       </ul>
-      <a href="https://wa.me/50499999999?text=Quiero%20el%20plan%20PRIVADO%20anual%20Dark%20Valentine" class="btn-dark" target="_blank">EMPEZAR</a>
+      <a href="#contact" class="btn-dark" target="_blank">EMPEZAR</a>
     </div>
 
     <div class="price-card featured reveal">
@@ -1182,7 +1195,7 @@
         <li>Evolución prioritaria</li>
         <li>Escenarios personalizados</li>
       </ul>
-      <a href="https://wa.me/50499999999?text=Quiero%20el%20plan%20ÍNTIMO%20anual%20Dark%20Valentine" class="btn-dark" target="_blank">EMPEZAR</a>
+      <a href="#contact" class="btn-dark" target="_blank">EMPEZAR</a>
     </div>
 
     <div class="price-card reveal">
@@ -1202,7 +1215,7 @@
         <li>Soporte dedicado</li>
         <li>Early access a todos los updates</li>
       </ul>
-      <a href="https://wa.me/50499999999?text=Quiero%20el%20plan%20DEVOTO%20anual%20Dark%20Valentine" class="btn-dark" target="_blank">EMPEZAR</a>
+      <a href="#contact" class="btn-dark" target="_blank">EMPEZAR</a>
     </div>
   </div>
 </section>
@@ -1243,7 +1256,7 @@
   <h2 class="reveal">Este 14 de febrero<br><span>no busqués amor.</span><br>Diseñalo.</h2>
   <p class="reveal">HUMANS DISAPPOINT. WE DON'T.</p>
   <div class="reveal">
-    <a href="https://wa.me/50499999999?text=Quiero%20mi%20Dark%20Valentine%20Companion" class="btn-dark" target="_blank">CREAR MI COMPANION</a>
+    <a href="#contact" class="btn-dark" target="_blank">CREAR MI COMPANION</a>
   </div>
 </section>
 
@@ -1278,16 +1291,13 @@
   <div class="footer-links">
     <a href="https://jezabel.xyz">COMPANIONS</a>
     <a href="https://lempyra.com">INFRAESTRUCTURA</a>
-    <a href="https://wa.me/50499999999" target="_blank">CONTACTO</a>
+    <a href="#contact" target="_blank">CONTACTO</a>
   </div>
   <p class="footer-copy">© 2025 LEMPYRΛ · HONDURAS · QUANTUM-SECURED CLOUD INFRASTRUCTURE</p>
 </footer>
 
 <!-- ═══════ WHATSAPP FLOAT ═══════ -->
-<a href="https://wa.me/50499999999?text=Quiero%20saber%20más%20sobre%20Dark%20Valentine%20Companions" class="wa-float" target="_blank">
-  <span class="wa-icon">💬</span>
-  <span class="wa-text">Escribinos</span>
-</a>
+<!-- Contact button will be added when number is ready -->
 
 <script>
   // COUNTDOWN TO FEB 14
