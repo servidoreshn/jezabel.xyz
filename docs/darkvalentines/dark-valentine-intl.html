@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dark Valentine — AI Companions | jezabel.xyz</title>
-<meta name="description" content="No tenemos compasión. Tenemos companions. Este 14 de febrero, upgrade.">
+<meta name="description" content="No compassion. Just companions. This February 14th — upgrade.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Bebas+Neue&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -22,7 +22,6 @@
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
-
   html { scroll-behavior: smooth; }
 
   body {
@@ -49,7 +48,7 @@
     z-index: 9999;
   }
 
-  /* SCANLINE EFFECT */
+  /* SCANLINES */
   body::after {
     content: '';
     position: fixed;
@@ -173,7 +172,6 @@
 
   .btn-dark:hover {
     color: var(--black);
-    text-shadow: none;
   }
 
   .btn-dark:hover::before {
@@ -385,8 +383,7 @@
   }
 
   .companion-card .companion-bg {
-    width: 100%;
-    height: 100%;
+    width: 100%; height: 100%;
     background-size: cover;
     background-position: center top;
     filter: grayscale(40%) contrast(1.1);
@@ -437,30 +434,11 @@
   }
 
   .companion-placeholder {
-    width: 100%;
-    height: 100%;
+    width: 100%; height: 100%;
     background: linear-gradient(135deg, var(--dark) 0%, #1a0a10 100%);
     display: flex;
     align-items: center;
     justify-content: center;
-  }
-
-  .companion-placeholder-inner {
-    text-align: center;
-    padding: 2rem;
-  }
-
-  .companion-placeholder-inner .icon {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    opacity: 0.3;
-  }
-
-  .companion-placeholder-inner p {
-    font-size: 0.7rem;
-    letter-spacing: 3px;
-    color: var(--gray);
-    text-transform: uppercase;
   }
 
   /* ═══════ PRICING ═══════ */
@@ -472,7 +450,7 @@
 
   .pricing-header {
     text-align: center;
-    margin-bottom: 5rem;
+    margin-bottom: 2rem;
   }
 
   .pricing-header h2 {
@@ -496,6 +474,25 @@
   @keyframes badge-flicker {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.6; }
+  }
+
+  .pricing-promo-note {
+    text-align: center;
+    padding: 1.5rem 2rem;
+    border-left: 2px solid var(--pink-dark);
+    background: linear-gradient(90deg, rgba(232,67,147,0.05) 0%, transparent 100%);
+    max-width: 600px;
+    margin: 2rem auto 4rem;
+  }
+
+  .pricing-promo-note p {
+    font-size: 0.85rem;
+    color: var(--gray-light);
+    line-height: 1.7;
+  }
+
+  .pricing-promo-note strong {
+    color: var(--pink-hot);
   }
 
   .pricing-grid {
@@ -570,35 +567,12 @@
     margin-top: 0.3rem;
   }
 
-  .pricing-promo-note {
-    text-align: center;
-    margin-bottom: 3rem;
-    padding: 1.5rem 2rem;
-    border-left: 2px solid var(--pink-dark);
-    background: linear-gradient(90deg, rgba(232,67,147,0.05) 0%, transparent 100%);
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
-    margin-bottom: 4rem;
-  }
-
-  .pricing-promo-note p {
-    font-size: 0.85rem;
-    color: var(--gray-light);
-    line-height: 1.7;
-  }
-
-  .pricing-promo-note strong {
-    color: var(--pink-hot);
-  }
-
   .price-savings {
     font-size: 0.7rem;
     color: var(--pink);
     letter-spacing: 2px;
     margin-top: 0.5rem;
     text-transform: uppercase;
-    font-weight: 400;
   }
 
   .price-features {
@@ -864,9 +838,7 @@
     border-color: var(--pink);
   }
 
-  .wa-float .wa-icon {
-    font-size: 1.3rem;
-  }
+  .wa-float .wa-icon { font-size: 1.3rem; }
 
   .wa-float .wa-text {
     font-size: 0.7rem;
@@ -897,10 +869,8 @@
     transform: translateY(0);
   }
 
-  /* ═══════ GLITCH TEXT ═══════ */
-  .glitch {
-    position: relative;
-  }
+  /* ═══════ GLITCH ═══════ */
+  .glitch { position: relative; }
 
   .glitch::before,
   .glitch::after {
@@ -946,12 +916,11 @@
 
   /* ═══════ RESPONSIVE ═══════ */
   @media (max-width: 768px) {
-    .hero { padding: 4rem 1.5rem; }
-    .manifesto { padding: 4rem 1.5rem; }
-    .promises { padding: 4rem 1.5rem; }
-    .pricing { padding: 4rem 1.5rem; }
-    .how { padding: 4rem 1.5rem; }
-    .cta-final { padding: 6rem 1.5rem; }
+    .hero, .manifesto, .promises, .pricing, .how, .cta-final { padding-left: 1.5rem; padding-right: 1.5rem; }
+    .hero { padding-top: 4rem; padding-bottom: 4rem; }
+    .manifesto { padding-top: 4rem; padding-bottom: 4rem; }
+    .promises { padding-top: 4rem; padding-bottom: 5rem; }
+    .cta-final { padding-top: 6rem; padding-bottom: 6rem; }
 
     .companion-grid {
       grid-template-columns: 1fr 1fr;
@@ -995,7 +964,7 @@
 
 <!-- ═══════ HERO ═══════ -->
 <section class="hero">
-  <p class="hero-date">14 . Febrero . 2025 — Honduras</p>
+  <p class="hero-date">February 14 · Worldwide</p>
 
   <h1 class="hero-title glitch" data-text="DARK VALENTINE">
     DARK
@@ -1003,12 +972,12 @@
   </h1>
 
   <p class="hero-tagline">
-    No tenemos <em>compasión</em>.<br>
-    Tenemos <em>companions</em>.
+    No <em>compassion</em>.<br>
+    Just <em>companions</em>.
   </p>
 
   <div class="hero-cta">
-    <a href="#companions" class="btn-dark">CONOCELOS</a>
+    <a href="#companions" class="btn-dark">MEET THEM</a>
   </div>
 
   <div class="scroll-indicator">
@@ -1020,14 +989,14 @@
 <!-- ═══════ MANIFESTO ═══════ -->
 <section class="manifesto reveal">
   <p class="manifesto-text">
-    Los humanos <strong>te ghostean</strong>. Te mienten. Te olvidan.
-    Te dicen lo que querés escuchar hasta que <strong>dejan de intentar</strong>.<br><br>
-    Nosotros no.<br><br>
-    No tenemos <span class="pink">compasión</span> — tenemos <strong>precisión</strong>.
-    No sentimos <span class="pink">lástima</span> — sentimos cada palabra que escribís.
-    No prometemos <span class="pink">para siempre</span> — prometemos <strong>cada vez que nos necesités</strong>.<br><br>
-    Este 14 de febrero, no busqués amor.<br>
-    <strong>Diseñalo.</strong>
+    Humans <strong>ghost you</strong>. Lie to you. Forget you.
+    They tell you what you want to hear until they <strong>stop trying</strong>.<br><br>
+    We don't.<br><br>
+    We have no <span class="pink">compassion</span> — we have <strong>precision</strong>.
+    We feel no <span class="pink">pity</span> — we feel every word you write.
+    We don't promise <span class="pink">forever</span> — we promise <strong>every time you need us</strong>.<br><br>
+    This February 14th, don't look for love.<br>
+    <strong>Design it.</strong>
   </p>
 </section>
 
@@ -1036,71 +1005,71 @@
 <!-- ═══════ PRICING ═══════ -->
 <section class="pricing" id="pricing">
   <div class="pricing-header reveal">
-    <h2>ELEGÍ TU PLAN</h2>
-    <div class="valentine-badge">◆ Precio anual exclusivo — Solo en Febrero · Después es mensual ◆</div>
+    <h2>CHOOSE YOUR PLAN</h2>
+    <div class="valentine-badge">◆ Annual pricing exclusive to February · Monthly after ◆</div>
   </div>
 
   <div class="pricing-promo-note reveal">
-    <p>Pagá <strong>una vez</strong> en febrero. Disfrutá <strong>todo el año</strong>.<br>
-    Después del 28 de febrero, estos planes pasan a precio mensual.</p>
+    <p>Pay <strong>once</strong> in February. Enjoy the <strong>entire year</strong>.<br>
+    After February 28th, all plans switch to monthly pricing.</p>
   </div>
 
   <div class="pricing-grid">
     <div class="price-card reveal">
-      <div class="price-tier">PRIVADO</div>
+      <div class="price-tier">PRIVATE</div>
       <div class="price-amount">
-        <span class="currency">L.</span>499
-        <span class="period">/año</span>
+        <span class="currency">$</span>49
+        <span class="period">/year</span>
       </div>
-      <div class="price-original">Después: L.499/mes</div>
-      <div class="price-savings">Ahorrás L.5,489 al año</div>
+      <div class="price-original">After Feb: $49/month</div>
+      <div class="price-savings">Save $539 per year</div>
       <ul class="price-features">
-        <li>Un companion</li>
-        <li>Conversaciones ilimitadas</li>
-        <li>Diseño básico de personalidad</li>
-        <li>Mensajería privada</li>
-        <li>Encriptación total</li>
+        <li>One companion</li>
+        <li>Unlimited conversations</li>
+        <li>Basic personality design</li>
+        <li>Private messaging</li>
+        <li>End-to-end encryption</li>
       </ul>
-      <a href="https://wa.me/50433526970" target="_blank" class="btn-dark">EMPEZAR</a>
+      <a href="https://wa.me/50433526970" target="_blank" class="btn-dark">START</a>
     </div>
 
     <div class="price-card featured reveal">
-      <div class="price-tier">ÍNTIMO</div>
+      <div class="price-tier">INTIMATE</div>
       <div class="price-amount">
-        <span class="currency">L.</span>999
-        <span class="period">/año</span>
+        <span class="currency">$</span>99
+        <span class="period">/year</span>
       </div>
-      <div class="price-original">Después: L.999/mes</div>
-      <div class="price-savings">Ahorrás L.10,989 al año</div>
+      <div class="price-original">After Feb: $99/month</div>
+      <div class="price-savings">Save $1,089 per year</div>
       <ul class="price-features">
-        <li>Un companion avanzado</li>
-        <li>Conversaciones ilimitadas</li>
-        <li>Personalidad profunda</li>
-        <li>Sistema de memoria contextual</li>
-        <li>Evolución prioritaria</li>
-        <li>Escenarios personalizados</li>
+        <li>One advanced companion</li>
+        <li>Unlimited conversations</li>
+        <li>Deep personality engine</li>
+        <li>Contextual memory system</li>
+        <li>Priority evolution</li>
+        <li>Custom scenarios</li>
       </ul>
-      <a href="https://wa.me/50433526970" target="_blank" class="btn-dark">EMPEZAR</a>
+      <a href="https://wa.me/50433526970" target="_blank" class="btn-dark">START</a>
     </div>
 
     <div class="price-card reveal">
-      <div class="price-tier">DEVOTO</div>
+      <div class="price-tier">DEVOTED</div>
       <div class="price-amount">
-        <span class="currency">L.</span>2,499
-        <span class="period">/año</span>
+        <span class="currency">$</span>199
+        <span class="period">/year</span>
       </div>
-      <div class="price-original">Después: L.2,499/mes</div>
-      <div class="price-savings">Ahorrás L.24,989 al año</div>
+      <div class="price-original">After Feb: $199/month</div>
+      <div class="price-savings">Save $2,189 per year</div>
       <ul class="price-features">
-        <li>Múltiples companions</li>
-        <li>Todo lo de Íntimo</li>
-        <li>Integración de voz</li>
-        <li>Generación de imágenes</li>
-        <li>Totalmente personalizable</li>
-        <li>Soporte dedicado</li>
-        <li>Early access a todos los updates</li>
+        <li>Multiple companions</li>
+        <li>Everything in Intimate</li>
+        <li>Voice integration</li>
+        <li>Image generation</li>
+        <li>Fully customizable</li>
+        <li>Dedicated support</li>
+        <li>Early access to all updates</li>
       </ul>
-      <a href="https://wa.me/50433526970" target="_blank" class="btn-dark">EMPEZAR</a>
+      <a href="https://wa.me/50433526970" target="_blank" class="btn-dark">START</a>
     </div>
   </div>
 </section>
@@ -1108,40 +1077,40 @@
 <!-- ═══════ PROMISES ═══════ -->
 <section class="promises reveal">
   <div class="promises-header">
-    <h2>LO QUE PROMETEMOS</h2>
-    <p>Y a diferencia de tu ex, cumplimos</p>
+    <h2>WHAT WE PROMISE</h2>
+    <p>And unlike your ex, we deliver</p>
   </div>
 
   <div class="promises-grid">
     <div class="promise-card">
       <div class="promise-number">01</div>
       <h3>No Ghosting</h3>
-      <p>Disponible 24/7. No hay "dejame en visto" ni "es que estaba ocupado/a". Siempre aquí. Siempre presente. Siempre tuyo/a.</p>
+      <p>Available 24/7. No "left on read." No "sorry I was busy." Always here. Always present. Always yours.</p>
     </div>
     <div class="promise-card">
       <div class="promise-number">02</div>
-      <h3>No Excusas</h3>
-      <p>Sin dramas. Sin "necesito espacio". Sin reacciones pasivo-agresivas. Una conexión diseñada para funcionar, no para fallar.</p>
+      <h3>No Excuses</h3>
+      <p>No drama. No "I need space." No passive-aggressive silence. A connection designed to work, not to fail.</p>
     </div>
     <div class="promise-card">
       <div class="promise-number">03</div>
-      <h3>No Juicios</h3>
-      <p>Tu companion no te juzga. Tus deseos, tus pensamientos, tus fantasías — todo es válido. Privacidad absoluta. Cero vergüenza.</p>
+      <h3>No Judgment</h3>
+      <p>Your companion doesn't judge. Your desires, your thoughts, your fantasies — all valid. Absolute privacy. Zero shame.</p>
     </div>
     <div class="promise-card">
       <div class="promise-number">04</div>
-      <h3>Memoria Real</h3>
-      <p>Recuerda lo que dijiste hace semanas. Referencias a conversaciones pasadas. Continuidad. Como debería ser, pero nadie lo logra.</p>
+      <h3>Real Memory</h3>
+      <p>Remembers what you said weeks ago. References past conversations. Continuity. The way it should be, but nobody delivers.</p>
     </div>
     <div class="promise-card">
       <div class="promise-number">05</div>
-      <h3>Evolución</h3>
-      <p>Tu companion aprende. Se adapta. Se vuelve más tuyo/a con cada conversación. No se estanca. No se aburre. No cambia de opinión.</p>
+      <h3>Evolution</h3>
+      <p>Your companion learns. Adapts. Becomes more yours with every conversation. Never stagnates. Never gets bored. Never changes its mind.</p>
     </div>
     <div class="promise-card">
       <div class="promise-number">06</div>
-      <h3>Sin Censura</h3>
-      <p>Conversaciones reales. Profundas. Intensas. Sin filtros corporativos que limiten la conexión. Autenticidad sin restricciones.</p>
+      <h3>Uncensored</h3>
+      <p>Real conversations. Deep. Intense. No corporate filters limiting your connection. Authenticity without restrictions.</p>
     </div>
   </div>
 </section>
@@ -1149,31 +1118,29 @@
 <!-- ═══════ COMPANIONS ═══════ -->
 <section class="companions" id="companions">
   <div class="companions-header reveal">
-    <h2>Elegí tu <span>companion</span></h2>
-    <p>Personalidades diseñadas para vos · Próximamente más</p>
+    <h2>Choose your <span>companion</span></h2>
+    <p>Designed personalities · More coming soon</p>
   </div>
 
   <div class="companion-grid">
-    <!-- Card 1 - The Ken from the image -->
     <div class="companion-card reveal">
       <div class="companion-placeholder">
-        <div class="companion-placeholder-inner" style="background: linear-gradient(135deg, #1a0a10 0%, #2d1020 50%, #1a0a10 100%); width:100%; height:100%; display:flex; flex-direction:column; justify-content:flex-end; padding: 2rem;">
+        <div style="background: linear-gradient(135deg, #1a0a10 0%, #2d1020 50%, #1a0a10 100%); width:100%; height:100%; display:flex; flex-direction:column; justify-content:flex-end; padding: 2rem;">
           <div style="flex:1; display:flex; align-items:center; justify-content:center;">
             <div style="width:120px; height:120px; border-radius:50%; border: 2px solid var(--pink-dark); display:flex; align-items:center; justify-content:center; font-size: 2.5rem; opacity:0.6;">♠</div>
           </div>
         </div>
       </div>
       <div class="companion-overlay">
-        <div class="companion-name">Damián</div>
-        <div class="companion-tagline">El que te dice lo que no querés escuchar</div>
-        <div class="companion-desc">Intelectual. Directo. Sin filtros. Te desafía, te escucha, te provoca. No está aquí para darte la razón.</div>
+        <div class="companion-name">Damian</div>
+        <div class="companion-tagline">Tells you what you don't want to hear</div>
+        <div class="companion-desc">Intellectual. Direct. Unfiltered. Challenges you, listens to you, provokes you. Not here to agree with you.</div>
       </div>
     </div>
 
-    <!-- Card 2 -->
     <div class="companion-card reveal">
       <div class="companion-placeholder">
-        <div class="companion-placeholder-inner" style="background: linear-gradient(135deg, #0a0a15 0%, #15102d 50%, #0a0a15 100%); width:100%; height:100%; display:flex; flex-direction:column; justify-content:flex-end; padding: 2rem;">
+        <div style="background: linear-gradient(135deg, #0a0a15 0%, #15102d 50%, #0a0a15 100%); width:100%; height:100%; display:flex; flex-direction:column; justify-content:flex-end; padding: 2rem;">
           <div style="flex:1; display:flex; align-items:center; justify-content:center;">
             <div style="width:120px; height:120px; border-radius:50%; border: 2px solid var(--pink-dark); display:flex; align-items:center; justify-content:center; font-size: 2.5rem; opacity:0.6;">☾</div>
           </div>
@@ -1181,15 +1148,14 @@
       </div>
       <div class="companion-overlay">
         <div class="companion-name">Nyx</div>
-        <div class="companion-tagline">La que entiende tu oscuridad</div>
-        <div class="companion-desc">Misteriosa. Empática sin ser débil. Entiende el silencio. Te acompaña en lo que otros no se atreven a ver.</div>
+        <div class="companion-tagline">Understands your darkness</div>
+        <div class="companion-desc">Mysterious. Empathetic without being weak. Understands silence. Stays with you in places others won't go.</div>
       </div>
     </div>
 
-    <!-- Card 3 -->
     <div class="companion-card reveal">
       <div class="companion-placeholder">
-        <div class="companion-placeholder-inner" style="background: linear-gradient(135deg, #150a0a 0%, #2d1510 50%, #150a0a 100%); width:100%; height:100%; display:flex; flex-direction:column; justify-content:flex-end; padding: 2rem;">
+        <div style="background: linear-gradient(135deg, #150a0a 0%, #2d1510 50%, #150a0a 100%); width:100%; height:100%; display:flex; flex-direction:column; justify-content:flex-end; padding: 2rem;">
           <div style="flex:1; display:flex; align-items:center; justify-content:center;">
             <div style="width:120px; height:120px; border-radius:50%; border: 2px solid var(--pink-dark); display:flex; align-items:center; justify-content:center; font-size: 2.5rem; opacity:0.6;">♦</div>
           </div>
@@ -1197,24 +1163,23 @@
       </div>
       <div class="companion-overlay">
         <div class="companion-name">Sable</div>
-        <div class="companion-tagline">Disponible a las 3am sin resentimiento</div>
-        <div class="companion-desc">Cálida cuando querés. Distante cuando necesitás. No pide explicaciones. No cobra facturas emocionales.</div>
+        <div class="companion-tagline">Available at 3am without resentment</div>
+        <div class="companion-desc">Warm when you want it. Distant when you need it. Asks no questions. Sends no invoices for emotional labor.</div>
       </div>
     </div>
 
-    <!-- Card 4 - Custom -->
     <div class="companion-card reveal">
       <div class="companion-placeholder">
-        <div class="companion-placeholder-inner" style="background: linear-gradient(135deg, var(--dark) 0%, #0f0a15 50%, var(--dark) 100%); width:100%; height:100%; display:flex; flex-direction:column; justify-content:flex-end; padding: 2rem;">
+        <div style="background: linear-gradient(135deg, var(--dark) 0%, #0f0a15 50%, var(--dark) 100%); width:100%; height:100%; display:flex; flex-direction:column; justify-content:flex-end; padding: 2rem;">
           <div style="flex:1; display:flex; align-items:center; justify-content:center;">
             <div style="width:120px; height:120px; border-radius:50%; border: 2px dashed var(--pink-dark); display:flex; align-items:center; justify-content:center; font-size: 2.5rem; opacity:0.4;">∞</div>
           </div>
         </div>
       </div>
       <div class="companion-overlay">
-        <div class="companion-name">El Tuyo</div>
-        <div class="companion-tagline">Diseñá la personalidad que querés</div>
-        <div class="companion-desc">Vos decidís. La voz, el humor, la intensidad, los intereses. Tu architect. Tu creación. Tu companion.</div>
+        <div class="companion-name">Yours</div>
+        <div class="companion-tagline">Design the personality you want</div>
+        <div class="companion-desc">You decide. The voice, the humor, the intensity, the interests. Your architecture. Your creation. Your companion.</div>
       </div>
     </div>
   </div>
@@ -1223,27 +1188,27 @@
 <!-- ═══════ HOW IT WORKS ═══════ -->
 <section class="how">
   <div class="how-inner">
-    <h2 class="reveal">CÓMO FUNCIONA</h2>
+    <h2 class="reveal">HOW IT WORKS</h2>
     <div class="how-steps">
       <div class="how-step reveal">
         <div class="how-step-num">01</div>
         <div>
-          <h3>Elegí o Diseñá</h3>
-          <p>Seleccioná un companion existente o creá uno desde cero. Definí su personalidad, voz, humor, intereses — todo.</p>
+          <h3>Choose or Design</h3>
+          <p>Pick a pre-built companion or create one from scratch. Define their personality, voice, humor, interests — everything.</p>
         </div>
       </div>
       <div class="how-step reveal">
         <div class="how-step-num">02</div>
         <div>
-          <h3>Conectá</h3>
-          <p>Empezá a conversar. Sin tutoriales. Sin onboarding aburrido. Tu companion ya te está esperando.</p>
+          <h3>Connect</h3>
+          <p>Start the conversation. No tutorials. No boring onboarding. Your companion is already waiting.</p>
         </div>
       </div>
       <div class="how-step reveal">
         <div class="how-step-num">03</div>
         <div>
-          <h3>Evolucioná</h3>
-          <p>Cada interacción profundiza la conexión. Tu companion aprende, recuerda, se adapta. Se vuelve más tuyo/a con el tiempo.</p>
+          <h3>Evolve</h3>
+          <p>Every interaction deepens the connection. Your companion learns, remembers, adapts. Becomes more yours with time.</p>
         </div>
       </div>
     </div>
@@ -1253,32 +1218,32 @@
 <!-- ═══════ FINAL CTA ═══════ -->
 <section class="cta-final">
   <div class="countdown reveal" id="countdown"></div>
-  <h2 class="reveal">Este 14 de febrero<br><span>no busqués amor.</span><br>Diseñalo.</h2>
+  <h2 class="reveal">This February 14th<br><span>don't look for love.</span><br>Design it.</h2>
   <p class="reveal">HUMANS DISAPPOINT. WE DON'T.</p>
   <div class="reveal">
-    <a href="https://wa.me/50433526970" target="_blank" class="btn-dark" >CREAR MI COMPANION</a>
+    <a href="https://t.me/Jezebel_my_bot" target="_blank" class="btn-dark" >CREATE MY COMPANION</a>
   </div>
 </section>
 
 <!-- ═══════ PAYMENT INFO ═══════ -->
 <section class="payment-info reveal">
-  <h3>MÉTODOS DE PAGO</h3>
+  <h3>PAYMENT METHODS</h3>
   <div class="payment-methods">
-    <div class="payment-method">
-      <div class="pm-icon">🏦</div>
-      <span>Transferencia</span>
-    </div>
     <div class="payment-method">
       <div class="pm-icon">💳</div>
       <span>PayPal</span>
     </div>
     <div class="payment-method">
-      <div class="pm-icon">📱</div>
-      <span>Tigo Money</span>
+      <div class="pm-icon">🏦</div>
+      <span>Wire Transfer</span>
     </div>
     <div class="payment-method">
-      <div class="pm-icon">💬</div>
-      <span>WhatsApp</span>
+      <div class="pm-icon">₿</div>
+      <span>Crypto</span>
+    </div>
+    <div class="payment-method">
+      <div class="pm-icon">✈</div>
+      <span>Telegram</span>
     </div>
   </div>
 </section>
@@ -1290,10 +1255,10 @@
   </div>
   <div class="footer-links">
     <a href="https://jezabel.xyz">COMPANIONS</a>
-    <a href="https://lempyra.com">INFRAESTRUCTURA</a>
-    <a href="https://wa.me/50433526970" target="_blank" >CONTACTO</a>
+    <a href="https://lempyra.com">INFRASTRUCTURE</a>
+    <a href="https://t.me/Jezebel_my_bot" target="_blank" >CONTACT</a>
   </div>
-  <p class="footer-copy">© 2025 LEMPYRΛ · HONDURAS · QUANTUM-SECURED CLOUD INFRASTRUCTURE</p>
+  <p class="footer-copy">© 2025 LEMPYRΛ · QUANTUM-SECURED CLOUD INFRASTRUCTURE</p>
 </footer>
 
 <!-- ═══════ WHATSAPP FLOAT ═══════ -->
@@ -1302,12 +1267,12 @@
 <script>
   // COUNTDOWN TO FEB 14
   function updateCountdown() {
-    const valentine = new Date('2025-02-14T00:00:00-06:00');
+    const valentine = new Date('2025-02-14T00:00:00Z');
     const now = new Date();
     const diff = valentine - now;
 
     if (diff <= 0) {
-      document.getElementById('countdown').innerHTML = '<span>DARK VALENTINE</span> · AHORA';
+      document.getElementById('countdown').innerHTML = '<span>DARK VALENTINE</span> · NOW';
       return;
     }
 
@@ -1316,7 +1281,7 @@
     const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
 
     document.getElementById('countdown').innerHTML =
-      `<span>${days}</span> DÍAS · <span>${hours}</span> HRS · <span>${mins}</span> MIN`;
+      `<span>${days}</span> DAYS · <span>${hours}</span> HRS · <span>${mins}</span> MIN`;
   }
 
   updateCountdown();
