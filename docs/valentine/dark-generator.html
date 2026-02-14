@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dark Valentine — Marketing Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Bebas+Neue&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0a0a0a;
+    --dark: #111111;
+    --darker: #0d0d0d;
+    --pink: #e84393;
+    --pink-hot: #fd79a8;
+    --pink-pale: #f8c8dc;
+    --pink-dark: #c44569;
+    --white: #f5f0eb;
+    --gray: #666;
+    --gray-light: #999;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'JetBrains Mono', monospace;
+    overflow: hidden;
+    cursor: crosshair;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  ::selection {
+    background: var(--pink);
+    color: var(--black);
+  }
+
+  /* NOISE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* SCANLINE EFFECT */
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 9998;
+  }
+
+  /* GLOW BEHIND PHRASE */
+  .glow {
+    position: fixed;
+    top: 50%; left: 50%;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(232,67,147,0.08) 0%, transparent 70%);
+    transform: translate(-50%, -50%);
+    animation: pulse-glow 4s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
+    50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+  }
+
+  /* BRAND TOP */
+  .brand {
+    position: fixed;
+    top: 2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 6px;
+    color: var(--pink);
+    opacity: 0.6;
+  }
+
+  /* PHRASE DISPLAY */
+  .phrase-container {
+    max-width: 800px;
+    padding: 2rem 3rem;
+    text-align: center;
+    position: relative;
+    z-index: 10;
+  }
+
+  .phrase {
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    font-size: clamp(1.8rem, 5vw, 3.5rem);
+    line-height: 1.3;
+    color: var(--white);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: none;
+  }
+
+  .phrase.visible {
+    opacity: 1;
+    transform: translateY(0);
+    animation: phrase-in 0.6s ease forwards;
+  }
+
+  .phrase.exit {
+    animation: phrase-out 0.3s ease forwards;
+  }
+
+  .phrase .highlight {
+    color: var(--pink-hot);
+    font-style: italic;
+  }
+
+  @keyframes phrase-in {
+    0% { opacity: 0; transform: translateY(30px); filter: blur(8px); }
+    100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+  }
+
+  @keyframes phrase-out {
+    0% { opacity: 1; transform: translateY(0); filter: blur(0); }
+    100% { opacity: 0; transform: translateY(-30px); filter: blur(8px); }
+  }
+
+  /* GLITCH FLASH ON TRANSITION */
+  .glitch-flash {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: var(--pink);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  .glitch-flash.active {
+    animation: flash 0.15s ease;
+  }
+
+  @keyframes flash {
+    0% { opacity: 0.15; }
+    50% { opacity: 0; }
+    100% { opacity: 0; }
+  }
+
+  /* COUNTER */
+  .counter {
+    position: fixed;
+    bottom: 8rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 4px;
+    color: var(--gray);
+  }
+
+  .counter span {
+    color: var(--pink);
+  }
+
+  /* BUTTON */
+  .btn-generate {
+    position: fixed;
+    bottom: 3rem;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 18px 60px;
+    border: 1px solid var(--pink);
+    color: var(--pink);
+    background: transparent;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.3rem;
+    letter-spacing: 4px;
+    cursor: pointer;
+    transition: all 0.4s ease;
+    position: fixed;
+    overflow: hidden;
+    z-index: 10;
+  }
+
+  .btn-generate::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: var(--pink);
+    transition: left 0.4s ease;
+    z-index: -1;
+  }
+
+  .btn-generate:hover {
+    color: var(--black);
+  }
+
+  .btn-generate:hover::before {
+    left: 0;
+  }
+
+  /* TAGLINE BOTTOM */
+  .tagline {
+    position: fixed;
+    bottom: 1.2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.55rem;
+    letter-spacing: 3px;
+    color: var(--gray);
+    opacity: 0.4;
+    white-space: nowrap;
+  }
+
+  /* DECORATIVE LINES */
+  .line-left, .line-right {
+    position: fixed;
+    top: 0;
+    width: 1px;
+    height: 100%;
+    background: linear-gradient(to bottom, transparent, var(--pink-dark), transparent);
+    opacity: 0.08;
+  }
+  .line-left { left: 15%; }
+  .line-right { right: 15%; }
+
+  /* JEZABEL WATERMARK */
+  .watermark {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(8rem, 20vw, 18rem);
+    letter-spacing: 20px;
+    color: var(--pink);
+    opacity: 0.015;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+
+<div class="glow"></div>
+<div class="line-left"></div>
+<div class="line-right"></div>
+<div class="watermark">JEZABEL</div>
+
+<div class="brand">DARK VALENTINE · JEZABEL.XYZ</div>
+
+<div class="phrase-container">
+  <div class="phrase" id="phrase"></div>
+</div>
+
+<div class="counter" id="counter"></div>
+
+<button class="btn-generate" id="btn" onclick="nextPhrase()">GENERATE</button>
+
+<div class="tagline">POWERED BY LEMPYRΛ · HONDURAS · NO TENEMOS COMPASIÓN</div>
+
+<div class="glitch-flash" id="flash"></div>
+
+<script src="./phrases.js"></script>
+
+<script>
+let current = -1;
+let cont =0;
+const phraseEl = document.getElementById('phrase');
+const counterEl = document.getElementById('counter');
+const flashEl = document.getElementById('flash');
+
+function nextPhrase() {
+  // Exit animation
+  phraseEl.classList.remove('visible');
+  phraseEl.classList.add('exit');
+
+  // Glitch flash
+  flashEl.classList.remove('active');
+  void flashEl.offsetWidth;
+  flashEl.classList.add('active');
+
+  setTimeout(() => {
+
+    current = cont < phrases.length
+      ? cont++
+      : current = Math.floor(Math.random() * phrases.length);
+
+    // Highlight "companion" and brand words
+    let text = phrases[current];
+    text = text.replace(/(companion[s]?)/gi, '<span class="highlight">$1</span>');
+    text = text.replace(/(ChatGPT)/gi, '<span style="text-decoration: line-through; opacity: 0.6;">$1</span>');
+
+    phraseEl.innerHTML = text;
+    phraseEl.classList.remove('exit');
+    void phraseEl.offsetWidth;
+    phraseEl.classList.add('visible');
+
+    counterEl.innerHTML = `<span>${String(current + 1).padStart(2, '0')}</span> / ${String(phrases.length).padStart(2, '0')}`;
+  }, 300);
+}
+
+// Show first phrase on load
+setTimeout(nextPhrase, 500);
+</script>
+
+</body>
+</html>
