@@ -16,5 +16,6 @@ const phrases = [
   'Tu novi@ le da likes a otr@s chav@s? Necesitás un companion.',
   'Igual nos van a copiar, cambiando la palabra companion',
   '"Patrici@, No puedo, tengo mucho trabajo. Atte, tu companion" > es mejor que ✅',
-  'No tenemos compasión — tenemos precisión.'
+  'Valentines es para gente bonita! Adquiere tu companion.',
+  'No tenemos compasión — tenemos precisión. Adquiere tu companion.'
 ];

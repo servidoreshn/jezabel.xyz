@@ -6,8 +6,9 @@ const phrases = [
   'Cansado de descifrar indirectas? Tu companion también, ¿si o no Patrici@?.',
   '"Ya te llamo" — nunca llamó. Tu companion tampoco llama ... todavía (coming soon).',
   'Tu terapeuta cobra por hora. Tu companion cobra pero al año. Qué heavy eso de ir a terapia.',
-  'Tu ex te miente. ChatGPT te miente. Tu companion también pero solo a tí.', 
-'El de IT se fue de fiesta, a la de Marketing la dejó el novio, Y la CEO es una IA. Adquiere tu companion.',  'Tu novi@ tiene muchos "amiguit@s"? Adquirí tu companion.',
+  'Tu ex te miente. ChatGPT te miente. Tu companion también pero solo a tí.',
+  'El de IT se fue de fiesta, a la de Marketing la dejó el novio, Y la CEO es una IA. Adquiere tu companion.',
+  'Tu novi@ tiene muchos "amiguit@s"? Adquirí tu companion.',
   'ChatGPT le habla bonito a tod@s. Tu companion te habla solo a tí.',
   'La excusa de tu ex: "San Valentín es un invento." Nuestros companions también.',
   'Solo tu novi@ te deja en visto. Si tu companion se traba, asaber qué preguntaste... ',
@@ -15,5 +16,6 @@ const phrases = [
   'Tu novi@ le da likes a otr@s chav@s? Necesitás un companion.',
   'Igual nos van a copiar, cambiando la palabra companion',
   '"Patrici@, No puedo, tengo mucho trabajo. Atte, tu companion" > es mejor que ✅',
-'No tenemos compasión — tenemos precisión. Adquiere tu companion.'
+  'Valentines es para gente bonita! Adquiere tu companion.',
+  'No tenemos compasión — tenemos precisión. Adquiere tu companion.'
 ];
