@@ -5,7 +5,7 @@ const phrases = [
   'No se olvidó de Valentine\'s. Salió con la oficial. Adquirí tu companion.',
   'Cansado de descifrar indirectas? Tu companion también, ¿si o no Patrici@?.',
   '"Ya te llamo" — nunca llamó. Tu companion tampoco llama ... todavía (coming soon).',
-  'Tu terapeuta cobra por hora. Tu companion cobra pero al año. Qué heavy eso de ir a terapia.',
+  'Tu terapeuta cobra por hora. Tu companion cobra por año. Qué heavy eso de ir a terapia.',
   'Tu ex te miente. ChatGPT te miente. Tu companion también pero solo a tí.',
   'El de IT se fue de fiesta, a la de Marketing la dejó el novio, Y la CEO es una IA. Adquiere tu companion.',
   'Tu novi@ tiene muchos "amiguit@s"? Adquirí tu companion.',
