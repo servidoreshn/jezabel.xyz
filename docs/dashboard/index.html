@@ -263,7 +263,76 @@ input,textarea{font-family:'Rajdhani',sans-serif}
 .chip:hover{border-color:var(--cyan);color:var(--cyan)}
 .chip.active{background:var(--red);color:var(--black);border-color:var(--red)}
 
+.view-toggle{display:flex;gap:0}
+.view-toggle .btn{
+  padding:10px 18px;background:var(--void);border:1px solid var(--line);color:var(--muted);
+  font-family:'Orbitron',sans-serif;font-weight:700;font-size:11px;letter-spacing:3px;text-transform:uppercase;
+  transition:all 0.15s;
+}
+.view-toggle .btn:first-child{border-right:none}
+.view-toggle .btn:hover{color:var(--cyan);border-color:var(--cyan)}
+.view-toggle .btn.active{background:var(--red);color:var(--black);border-color:var(--red);box-shadow:0 0 14px rgba(255,41,41,0.4)}
+.sort-btn{
+  padding:10px 18px;background:var(--void);border:1px solid var(--magenta-dim);color:var(--magenta);
+  font-family:'Orbitron',sans-serif;font-weight:700;font-size:11px;letter-spacing:3px;text-transform:uppercase;
+  transition:all 0.15s;
+}
+.sort-btn:hover{background:var(--magenta);color:var(--black);box-shadow:0 0 14px rgba(255,43,214,0.4)}
+.sort-btn .arr{margin-left:6px;font-size:13px}
+
 .roster-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px}
+
+/* STRIP MODE — horizontal linked-list */
+.strip-wrap{position:relative;margin:0 -32px;padding:0 60px}
+.roster-strip{
+  display:flex;gap:48px;overflow-x:auto;scroll-behavior:smooth;
+  padding:24px 24px;scroll-snap-type:x proximity;
+  -webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:var(--red) var(--void);
+}
+.roster-strip::-webkit-scrollbar{height:8px}
+.roster-strip::-webkit-scrollbar-track{background:var(--void)}
+.roster-strip::-webkit-scrollbar-thumb{background:var(--red);box-shadow:0 0 8px var(--red)}
+.roster-strip .card{
+  min-width:240px;max-width:240px;scroll-snap-align:start;position:relative;
+  animation:slidein 0.35s ease backwards;
+}
+.roster-strip .card:not(:first-child)::before{
+  content:'→';position:absolute;left:-40px;top:50%;transform:translateY(-50%);
+  font-family:'Orbitron',sans-serif;font-weight:900;font-size:22px;color:var(--red);
+  text-shadow:0 0 10px var(--red);letter-spacing:0;
+}
+.roster-strip .card:not(:first-child)::after{
+  content:'';position:absolute;left:-32px;right:auto;top:50%;width:18px;height:1px;
+  background:linear-gradient(90deg,transparent,var(--red),transparent);
+  transform:translateY(-50%);box-shadow:0 0 6px var(--red);
+}
+.roster-strip .card:nth-child(1){animation-delay:0s}
+.roster-strip .card:nth-child(2){animation-delay:0.06s}
+.roster-strip .card:nth-child(3){animation-delay:0.12s}
+.roster-strip .card:nth-child(4){animation-delay:0.18s}
+.roster-strip .card:nth-child(5){animation-delay:0.24s}
+.roster-strip .card:nth-child(6){animation-delay:0.30s}
+.roster-strip .card:nth-child(7){animation-delay:0.36s}
+.roster-strip .card:nth-child(8){animation-delay:0.42s}
+.roster-strip .card:nth-child(n+9){animation-delay:0.48s}
+@keyframes slidein{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+.node-tag{
+  position:absolute;top:-12px;left:50%;transform:translateX(-50%);
+  padding:3px 8px;background:var(--void);border:1px solid var(--red);color:var(--red);
+  font-family:'Orbitron',sans-serif;font-weight:800;font-size:9px;letter-spacing:2px;text-transform:uppercase;
+}
+.node-tag.start{border-color:var(--blue);color:var(--blue)}
+.node-tag.end{border-color:var(--magenta);color:var(--magenta)}
+
+.hold-arrow{
+  position:absolute;top:0;bottom:0;width:48px;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(90deg,var(--black),transparent);border:none;color:var(--red);
+  font-family:'Orbitron',sans-serif;font-weight:900;font-size:32px;cursor:pointer;z-index:5;
+  user-select:none;text-shadow:0 0 12px var(--red);transition:all 0.15s;
+}
+.hold-arrow.right{left:auto;right:0;background:linear-gradient(270deg,var(--black),transparent)}
+.hold-arrow.left{left:0}
+.hold-arrow:hover,.hold-arrow.holding{color:var(--cyan);text-shadow:0 0 20px var(--cyan);transform:scale(1.2)}
 .card{
   background:var(--surface);border:1px solid var(--cyan-dim);padding:20px;cursor:pointer;
   transition:all 0.15s;position:relative;display:flex;flex-direction:column;gap:14px;
@@ -417,12 +486,21 @@ input,textarea{font-family:'Rajdhani',sans-serif}
   <!-- ROSTER VIEW -->
   <div class="view" id="vRoster">
     <div class="roster-controls">
-      <input class="search-input" id="qInput" placeholder="search name · system_prompt · owner…" oninput="renderResults()">
+      <input class="search-input" id="qInput" placeholder="search name · prompt · owner…" oninput="renderResults()">
+      <div class="view-toggle">
+        <button class="btn active" id="vmAll"  onclick="setView('strip')">▤ ALL</button>
+        <button class="btn"        id="vmGrid" onclick="setView('grid')">▦ GRID</button>
+      </div>
+      <button class="sort-btn" id="sortBtn" onclick="cycleSort()">SORT <span class="arr" id="sortArr">A→Z</span></button>
       <div class="chip-group"><span class="gl">ROLE</span><div class="chips" id="roleChips" style="display:flex;gap:8px"></div></div>
       <div class="chip-group"><span class="gl">PLATFORM</span><div class="chips" id="platChips" style="display:flex;gap:8px"></div></div>
-      <div class="chip-group"><span class="gl">ACTIVE</span><div class="chips" id="actChips" style="display:flex;gap:8px"></div></div>
+      <div class="chip-group" style="display:none"><span class="gl">ACTIVE</span><div class="chips" id="actChips"></div></div>
     </div>
-    <div class="roster-grid" id="results"></div>
+    <div class="strip-wrap" id="stripWrap">
+      <button class="hold-arrow left"  id="holdL">◂</button>
+      <div class="roster-strip" id="results"></div>
+      <button class="hold-arrow right" id="holdR">▸</button>
+    </div>
   </div>
 
   <!-- NEW DAE VIEW (placeholder — editor not yet exposed by /love/v1) -->
@@ -543,6 +621,8 @@ function recipeFor(dae,variant){return((dae&&dae.recipes)||[]).find(function(r){
 
 // ─ STATE ─
 var current=null, ownDAE=null, allDAEs=[], filter={q:'',role:'',platform:''};
+var viewMode='strip';  // 'strip' (default ALL linked-list) | 'grid'
+var sortMode='az';     // 'az' | 'za' (more options later — 'used' etc.)
 
 // ─ TABS ─
 function setTab(t){
@@ -599,6 +679,21 @@ async function loadAll(){
   if(res.stub) toast('(STUB) /LOVE/V1/DAES PENDING — USING MOCK','warn');
   renderResults();
 }
+function setView(m){
+  viewMode=m;
+  document.getElementById('vmAll').classList.toggle('active',m==='strip');
+  document.getElementById('vmGrid').classList.toggle('active',m==='grid');
+  var el=document.getElementById('results');
+  el.className=(m==='strip'?'roster-strip':'roster-grid');
+  document.getElementById('holdL').style.display=(m==='strip'?'flex':'none');
+  document.getElementById('holdR').style.display=(m==='strip'?'flex':'none');
+  renderResults();
+}
+function cycleSort(){
+  sortMode=(sortMode==='az'?'za':'az');
+  document.getElementById('sortArr').textContent=(sortMode==='az'?'A→Z':'Z→A');
+  renderResults();
+}
 function renderResults(){
   var q=(document.getElementById('qInput').value||'').toLowerCase();filter.q=q;
   var rows=allDAEs.filter(function(d){
@@ -611,12 +706,27 @@ function renderResults(){
     }
     return true;
   });
+  // sort
+  rows.sort(function(a,b){
+    var na=(a.name||'').toLowerCase(),nb=(b.name||'').toLowerCase();
+    if(sortMode==='az') return na<nb?-1:na>nb?1:0;
+    if(sortMode==='za') return nb<na?-1:nb>na?1:0;
+    return 0;
+  });
   var el=document.getElementById('results');
   if(!rows.length){el.innerHTML='<div class="roster-empty">NO MATCHES</div>';return;}
-  el.innerHTML=rows.map(function(d){
+  var last=rows.length-1;
+  el.innerHTML=rows.map(function(d,i){
     var plat=(d.platform||'—').toUpperCase();
     var nr=(d.recipes||[]).length;
+    var tag='';
+    if(viewMode==='strip'){
+      if(i===0)    tag='<span class="node-tag start">◂ START</span>';
+      else if(i===last) tag='<span class="node-tag end">END ▸</span>';
+      else         tag='<span class="node-tag">NODE '+(i+1)+'</span>';
+    }
     return '<div class="card" onclick="pickResult('+d.bot+')">'+
+      tag+
       '<div class="card-portrait">'+(d.name||'?').charAt(0).toUpperCase()+'</div>'+
       '<div class="card-name">'+escHtml(d.name)+'</div>'+
       '<div class="card-meta">'+
@@ -628,6 +738,19 @@ function renderResults(){
   }).join('');
 }
 function pickResult(botId){var d=allDAEs.find(function(x){return x.bot===botId;});if(!d)return;mountDAE(d);}
+
+// ─ HOLD-SCROLL on the linked-list strip ─
+var scrollTimer=null;
+function startScroll(dir,btn){
+  if(scrollTimer)return;
+  if(btn)btn.classList.add('holding');
+  var el=document.getElementById('results');
+  scrollTimer=setInterval(function(){el.scrollLeft+=dir*10;},16);
+}
+function stopScroll(btn){
+  if(scrollTimer){clearInterval(scrollTimer);scrollTimer=null;}
+  document.querySelectorAll('.hold-arrow').forEach(function(b){b.classList.remove('holding');});
+}
 
 // ─ CHIPS ─
 function buildChips(){
@@ -735,8 +858,21 @@ document.addEventListener('DOMContentLoaded',function(){
 });
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeChat();});
 
+// ─ HOLD-SCROLL wiring (mouse + touch) ─
+function wireHold(id,dir){
+  var b=document.getElementById(id);if(!b)return;
+  b.addEventListener('mousedown',function(e){e.preventDefault();startScroll(dir,b);});
+  b.addEventListener('mouseup',function(){stopScroll(b);});
+  b.addEventListener('mouseleave',function(){stopScroll(b);});
+  b.addEventListener('touchstart',function(e){e.preventDefault();startScroll(dir,b);},{passive:false});
+  b.addEventListener('touchend',function(){stopScroll(b);});
+  b.addEventListener('touchcancel',function(){stopScroll(b);});
+}
+wireHold('holdL',-1);wireHold('holdR',1);
+
 (async function(){
   buildChips();
+  setView(viewMode);  // ensure CSS class + arrow visibility align with default
   ownDAE=await fetchOwnDAE();
   if(ownDAE)mountDAE(ownDAE);
 })();
