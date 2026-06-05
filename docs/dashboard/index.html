@@ -693,7 +693,11 @@ var IMG_NSFW='cyberrealisticPony_v110-001.safetensors';
 var APP_ID='jezabel';
 function authHeader(){var t=sessionStorage.getItem(TK);return t?{'Authorization':'Bearer '+t}:{};}
 async function apiFetch(path,init){
-  init=init||{}; var headers={'X-App-ID':APP_ID,...(init.headers||{}),...authHeader()};
+  init=init||{};
+  var headers={...(init.headers||{}),...authHeader()};
+  // X-App-ID only on orch routes; sar1a CORS for /love/v1 + /auth doesn't allow
+  // the custom header in preflight, so adding it would silently fail every request
+  if(path.indexOf('/orch')===0) headers['X-App-ID']=APP_ID;
   var r=await fetch(SAR1A+path,{...init,headers:headers});
   if(r.status===401){sessionStorage.removeItem(TK);sessionStorage.removeItem(UK);
     var b=(location.pathname.match(/^(.*\/docs\/)/)||['','/'])[1];window.location.replace(b+'login/');
@@ -762,14 +766,14 @@ async function fetchAllDAEs(){
     if(r.ok){var j=await r.json();return {items:unwrap(j)};}
     if(r.status===403){toast('ROSTER FORBIDDEN — ADMIN ONLY','warn');return {forbidden:true,items:[]};}
     toast('ROSTER HTTP '+r.status,'err');
-  }catch(e){toast('ROSTER FETCH FAILED','err');}
+  }catch(e){toast('SEARCH FETCH FAILED: '+(e.message||e),'err');console.error('fetchAllDAEs',e);}
   return {stub:true,items:STUB_DAES};
 }
 async function fetchMyDAEs(){
   try{var r=await apiFetch('/love/v1/daes?owner=self',{method:'GET'});
     if(r.ok){var j=await r.json();return {items:unwrap(j)};}
     toast('MINE HTTP '+r.status,'err');
-  }catch(e){toast('MINE FETCH FAILED','err');}
+  }catch(e){toast('MINE FETCH FAILED: '+(e.message||e),'err');console.error('fetchMyDAEs',e);}
   return {stub:true,items:STUB_DAES.filter(function(d){return d.owner_user_id===(userData.id||1);})};
 }
 // Defensive per-card lookup when list response omits profile_pic
