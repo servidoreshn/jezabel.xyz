@@ -740,26 +740,44 @@ var STUB_DAES=[
 // ─ API (real /love/v1) ─
 // Spec: GET /dae?owner=self → primary DAE object · /dae?bot=<id> → one by id
 //       GET /daes?owner=self → user list · /daes → admin all (403 else)
+// Tolerant unwrap: response may be bare array OR {items:[]} / {daes:[]} object.
+function unwrap(json){
+  if(Array.isArray(json)) return json;
+  if(json && Array.isArray(json.items)) return json.items;
+  if(json && Array.isArray(json.daes))  return json.daes;
+  if(json && Array.isArray(json.data))  return json.data;
+  return [];
+}
 async function fetchOwnDAE(){
   try{var r=await apiFetch('/love/v1/dae?owner=self',{method:'GET'});
     if(r.ok)return await r.json();
     if(r.status===404)return null;
-  }catch(_){}
+    toast('PRIMARY HTTP '+r.status,'err');
+  }catch(e){toast('PRIMARY FETCH FAILED','err');}
   if(IS_ADMIN)return STUB_DAES[0];
   return null;
 }
 async function fetchAllDAEs(){
   try{var r=await apiFetch('/love/v1/daes',{method:'GET'});
-    if(r.ok)return {items:await r.json()};
+    if(r.ok){var j=await r.json();return {items:unwrap(j)};}
     if(r.status===403){toast('ROSTER FORBIDDEN — ADMIN ONLY','warn');return {forbidden:true,items:[]};}
-  }catch(_){}
+    toast('ROSTER HTTP '+r.status,'err');
+  }catch(e){toast('ROSTER FETCH FAILED','err');}
   return {stub:true,items:STUB_DAES};
 }
 async function fetchMyDAEs(){
   try{var r=await apiFetch('/love/v1/daes?owner=self',{method:'GET'});
-    if(r.ok)return {items:await r.json()};
-  }catch(_){}
+    if(r.ok){var j=await r.json();return {items:unwrap(j)};}
+    toast('MINE HTTP '+r.status,'err');
+  }catch(e){toast('MINE FETCH FAILED','err');}
   return {stub:true,items:STUB_DAES.filter(function(d){return d.owner_user_id===(userData.id||1);})};
+}
+// Defensive per-card lookup when list response omits profile_pic
+async function fetchDAEByBot(bot){
+  try{var r=await apiFetch('/love/v1/dae?bot='+bot,{method:'GET'});
+    if(r.ok)return await r.json();
+  }catch(_){}
+  return null;
 }
 function recipeFor(dae,variant){return((dae&&dae.recipes)||[]).find(function(r){return r.variant===variant;});}
 
@@ -1012,7 +1030,7 @@ function renderResults(){
            'style="--tc:'+t.border+';--tcg:'+t.glow+';--td:'+t.data+';--tt:'+t.tint+'" '+
            'onclick="pickResult('+d.bot+')">'+
       tag+
-      '<div class="card-bg" data-letter="'+letter+'"></div>'+
+      '<div class="card-bg" data-letter="'+letter+'">'+letter+'</div>'+
       '<div class="card-vignette"></div>'+
       '<div class="card-data">'+
         '<div class="dline tl">ID·0x'+(d.bot.toString(16).toUpperCase().padStart(3,'0'))+'</div>'+
@@ -1031,31 +1049,36 @@ function renderResults(){
 }
 
 // ─ Lazy-load avatars on roster cards via IntersectionObserver ─
+// If list response omits profile_pic, fall back to per-card /dae?bot=<id> lookup.
 var _avatarIO=null;
 function lazyLoadAvatars(){
   if(_avatarIO){_avatarIO.disconnect();}
   _avatarIO=new IntersectionObserver(function(entries){
-    entries.forEach(function(en){
+    entries.forEach(async function(en){
       if(!en.isIntersecting)return;
       var card=en.target;
       var pic=card.dataset.pic;
       var bot=parseInt(card.dataset.bot,10);
       _avatarIO.unobserve(card);
       if(!pic){
-        // not baked yet — letter fallback
-        var bg=card.querySelector('.card-bg');
-        if(bg){bg.classList.add('letter-only');bg.textContent=bg.dataset.letter;}
+        // fallback: fetch single DAE to get profile_pic
+        var d=await fetchDAEByBot(bot);
+        pic=d&&d.profile_pic;
+        if(pic) card.dataset.pic=pic;
+      }
+      if(!pic){
+        var bg0=card.querySelector('.card-bg');
+        if(bg0)bg0.classList.add('letter-only');
         return;
       }
-      loadAvatarBlob(pic).then(function(blob){
-        if(!blob)return;
-        var url=URL.createObjectURL(blob);
-        setAvatarUrl(bot,url);
-        var bg=card.querySelector('.card-bg');
-        if(bg){bg.style.backgroundImage='url('+url+')';bg.classList.add('loaded');}
-      });
+      var blob=await loadAvatarBlob(pic);
+      if(!blob)return;
+      var url=URL.createObjectURL(blob);
+      setAvatarUrl(bot,url);
+      var bg=card.querySelector('.card-bg');
+      if(bg){bg.style.backgroundImage='url('+url+')';bg.classList.add('loaded');}
     });
-  },{root:document.getElementById('results'),rootMargin:'200px'});
+  },{root:null,rootMargin:'300px'});  // null root = browser viewport (works in any view mode)
   document.querySelectorAll('#results .card').forEach(function(c){_avatarIO.observe(c);});
 }
 function pickResult(botId){var d=allDAEs.find(function(x){return x.bot===botId;});if(!d)return;mountDAE(d);}
