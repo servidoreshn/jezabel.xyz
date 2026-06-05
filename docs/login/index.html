@@ -4,66 +4,112 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://sar1a.lempyra.com; font-src 'self' https://fonts.gstatic.com; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src 'self' data: blob:;">
-<title>jezabel — enter</title>
+<title>jezabel · access</title>
 <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@300;400&display=swap">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@600;700;800;900&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'JetBrains Mono',monospace;background:#0a0a0a;color:#e84393;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;}
-body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 50% 50%,rgba(232,67,147,.04) 0%,transparent 70%);pointer-events:none;}
-body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.07) 3px,rgba(0,0,0,.07) 4px);pointer-events:none;z-index:100;}
-.panel{width:min(480px,96vw);border:1px solid #1e0a14;background:#080808;box-shadow:0 0 80px rgba(232,67,147,.06);}
-.panel-top{padding:28px 28px 20px;border-bottom:1px solid #150a10;}
-.brand{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:400;font-style:italic;color:#f0eae5;letter-spacing:2px;margin-bottom:4px;}
-.brand span{color:#e84393;}
-.brand-sub{font-size:9px;letter-spacing:4px;color:#333;text-transform:uppercase;}
-.panel-body{padding:24px 28px 28px;}
-.field{margin-bottom:16px;}
-.field-label{font-size:9px;letter-spacing:3px;color:#442233;text-transform:uppercase;display:block;margin-bottom:6px;}
+:root{
+  --black:#0a0c0e; --void:#06080a; --surface:#11161c; --raised:#1a2028; --line:#243040;
+  --red:#ff2929; --red-dim:#a00010; --cyan:#3df0ff; --cyan-dim:#1ba8b8; --blue:#0099ff;
+  --magenta:#ff2bd6; --text:#e8f0f8; --muted:#5a6a7a; --danger:#ff5566; --ok:#3df0a8;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{
+  font-family:'Rajdhani',sans-serif;background:var(--black);color:var(--text);
+  font-size:15px;line-height:1.4;letter-spacing:0.3px;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  background-image:
+    linear-gradient(135deg,#0a0c0e 0%,#0e1218 100%),
+    radial-gradient(ellipse at 80% -20%,rgba(255,41,41,0.08),transparent 50%),
+    radial-gradient(ellipse at 20% 120%,rgba(255,43,214,0.08),transparent 50%);
+}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:100;
+  background:repeating-linear-gradient(0deg,transparent 0,transparent 3px,rgba(255,41,41,0.015) 3px,rgba(255,41,41,0.015) 4px);
+}
+.panel{
+  width:min(460px,94vw);background:var(--surface);border:1px solid var(--red);
+  position:relative;z-index:5;
+  box-shadow:0 0 0 1px rgba(255,41,41,0.15),0 30px 80px rgba(0,0,0,0.5),0 0 90px rgba(255,41,41,0.12);
+  clip-path:polygon(16px 0,100% 0,100% calc(100% - 16px),calc(100% - 16px) 100%,0 100%,0 16px);
+}
+.panel::before{content:'';position:absolute;top:-1px;left:30px;width:80px;height:3px;background:var(--red);box-shadow:0 0 14px var(--red)}
+.panel::after{content:'';position:absolute;bottom:-1px;right:30px;width:80px;height:3px;background:var(--cyan);box-shadow:0 0 14px var(--cyan)}
+.panel-top{padding:28px 32px 22px;border-bottom:1px solid var(--line);position:relative}
+.brand{
+  font-family:'Orbitron',sans-serif;font-weight:900;font-size:26px;letter-spacing:5px;
+  color:var(--red);text-shadow:0 0 14px rgba(255,41,41,0.6),0 0 28px rgba(255,41,41,0.3);
+}
+.brand .dot{color:var(--magenta)}
+.brand-sub{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:5px;color:var(--cyan);text-transform:uppercase;margin-top:6px}
+.access-tag{
+  position:absolute;top:24px;right:32px;padding:4px 10px;
+  background:var(--void);border:1px solid var(--cyan);color:var(--cyan);
+  font-family:'Orbitron',sans-serif;font-weight:700;font-size:9px;letter-spacing:2px;
+}
+.panel-body{padding:26px 32px 30px}
+.field{margin-bottom:18px}
+.field-label{
+  font-family:'Orbitron',sans-serif;font-weight:700;font-size:10px;letter-spacing:3px;
+  color:var(--cyan);text-transform:uppercase;display:block;margin-bottom:8px;
+}
 input[type=text],input[type=password]{
-  width:100%;background:transparent;border:none;
-  border-bottom:1px solid #1e0a14;color:#f0eae5;
-  font-family:'JetBrains Mono',monospace;font-size:13px;
-  padding:8px 4px;letter-spacing:1px;caret-color:#e84393;
+  width:100%;background:var(--void);border:1px solid var(--line);color:var(--text);
+  font-family:'Rajdhani',sans-serif;font-weight:500;font-size:15px;padding:14px 16px;
+  letter-spacing:1px;caret-color:var(--red);transition:border-color 0.15s,box-shadow 0.15s;
 }
-input:focus{border-bottom-color:#e84393;}
+input:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 1px var(--red),inset 0 0 18px rgba(255,41,41,0.06)}
 .btn{
-  width:100%;background:transparent;border:1px solid #e84393;color:#e84393;
-  font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:3px;
-  padding:12px;cursor:pointer;margin-top:20px;text-transform:uppercase;
-  transition:background .2s,color .2s,box-shadow .2s;
+  width:100%;background:linear-gradient(180deg,rgba(255,41,41,0.2),rgba(160,0,16,0.08));
+  border:1px solid var(--red);color:var(--red);
+  font-family:'Orbitron',sans-serif;font-weight:800;font-size:13px;letter-spacing:4px;
+  padding:16px;cursor:pointer;margin-top:22px;text-transform:uppercase;
+  transition:all 0.18s;text-shadow:0 0 8px rgba(255,41,41,0.6);
+  box-shadow:0 0 0 1px rgba(255,41,41,0.3),inset 0 0 20px rgba(255,41,41,0.08);
+  clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px);
 }
-.btn:hover{background:#e84393;color:#0a0a0a;box-shadow:0 0 30px rgba(232,67,147,.25);}
-.btn:disabled{opacity:.3;cursor:not-allowed;}
-.status{margin-top:14px;font-size:11px;min-height:16px;line-height:1.6;letter-spacing:.5px;white-space:pre;}
-.status.err{color:#cc3333;} .status.ok{color:#e84393;} .status.dim{color:#2a1a22;}
-.blink{animation:blink .8s step-end infinite;}
-@keyframes blink{50%{opacity:0;}}
-.back{display:block;text-align:center;margin-top:18px;font-size:10px;color:#1a0a14;text-decoration:none;letter-spacing:1px;}
-.back:hover{color:#442233;}
+.btn:hover{background:var(--red);color:var(--black);box-shadow:0 0 28px rgba(255,41,41,0.55);text-shadow:none}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.status{
+  margin-top:16px;font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:2px;
+  min-height:18px;line-height:1.6;white-space:pre-wrap;text-transform:uppercase;
+}
+.status.err{color:var(--danger)}
+.status.ok{color:var(--ok)}
+.status.dim{color:var(--muted)}
+.blink{animation:blink .8s step-end infinite}
+@keyframes blink{50%{opacity:0}}
+.back{
+  display:block;text-align:center;margin-top:22px;
+  font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;
+  color:var(--muted);text-decoration:none;transition:color 0.15s;
+}
+.back:hover{color:var(--cyan);text-shadow:0 0 8px var(--cyan)}
 </style>
 </head>
 <body>
 <div class="panel">
   <div class="panel-top">
-    <div class="brand">jeza<span>bel</span></div>
-    <div class="brand-sub">AI companion studio</div>
+    <div class="brand">JEZABEL<span class="dot">.</span>XYZ</div>
+    <div class="brand-sub">⟨ DAE CONTROL ⟩</div>
+    <div class="access-tag">ACCESS</div>
   </div>
   <div class="panel-body">
     <form id="login-form" onsubmit="doLogin(); return false;">
-    <div class="field">
-      <label class="field-label" for="u">username</label>
-      <input type="text" id="u" name="username" autocomplete="off" autofocus placeholder="_">
-    </div>
-    <div class="field">
-      <label class="field-label" for="p">password</label>
-      <input type="password" id="p" name="password" autocomplete="off" placeholder="_">
-    </div>
-    <button type="submit" class="btn" id="btn">[ enter the studio ]</button>
+      <div class="field">
+        <label class="field-label" for="u">USERNAME</label>
+        <input type="text" id="u" name="username" autocomplete="off" autofocus placeholder="—">
+      </div>
+      <div class="field">
+        <label class="field-label" for="p">PASSWORD</label>
+        <input type="password" id="p" name="password" autocomplete="off" placeholder="—">
+      </div>
+      <button type="submit" class="btn" id="btn">▶ ENTER THE GRID</button>
     </form>
     <div class="status dim" id="status">&nbsp;</div>
-    <a href="../" class="back">← back to jezabel.xyz</a>
+    <a href="../" class="back">◂ BACK TO JEZABEL.XYZ</a>
   </div>
 </div>
 <script>
@@ -73,9 +119,9 @@ document.addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
 async function doLogin(){
   var u=document.getElementById('u').value.trim(),p=document.getElementById('p').value;
   var btn=document.getElementById('btn'),st=document.getElementById('status');
-  if(!u||!p){st.className='status err';st.textContent='> credentials required';return;}
+  if(!u||!p){st.className='status err';st.textContent='⟨ CREDENTIALS REQUIRED ⟩';return;}
   btn.disabled=true;st.className='status dim';
-  st.innerHTML='> connecting<span class="blink">_</span>';
+  st.innerHTML='⟨ CONNECTING<span class="blink">_</span> ⟩';
   try{
     var r1=await fetch(AUTH.url+'/auth/authorize',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p,client_id:AUTH.clientId,scope:AUTH.scope})});
     var d1=await r1.json();if(!r1.ok)throw new Error(d1.detail||'auth failed');
@@ -84,9 +130,9 @@ async function doLogin(){
     var d2=await r2.json();if(!r2.ok)throw new Error(d2.detail||'token failed');
     sessionStorage.setItem(AUTH.tokenKey,d2.access_token);
     sessionStorage.setItem(AUTH.userKey,JSON.stringify({username:u}));
-    st.className='status ok';st.textContent='> access granted\n> loading companions...';
+    st.className='status ok';st.textContent='⟨ ACCESS GRANTED ⟩\n⟨ LOADING DAE GRID… ⟩';
     setTimeout(function(){window.location.replace('../dashboard/');},600);
-  }catch(e){st.className='status err';st.textContent='> '+e.message;btn.disabled=false;}
+  }catch(e){st.className='status err';st.textContent='⟨ '+(e.message||e).toUpperCase()+' ⟩';btn.disabled=false;}
 }
 </script>
 </body>
