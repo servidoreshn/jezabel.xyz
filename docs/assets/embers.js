@@ -39,14 +39,14 @@
       H = c.height = window.innerHeight * DPR;
       c.style.width  = window.innerWidth  + 'px';
       c.style.height = window.innerHeight + 'px';
-      var n = Math.floor(window.innerWidth * window.innerHeight / 13000);  // density bump
+      var n = Math.floor(window.innerWidth * window.innerHeight / 18000);  // L: not more particles
       bits = [];
       for (var i = 0; i < n; i++) bits.push({
         x: Math.random() * W, y: Math.random() * H,
-        r: (Math.random() * 1.8 + 0.5) * DPR,                            // larger embers
+        r: (Math.random() * 2.0 + 0.6) * DPR,                            // bigger embers
         vy: -(Math.random() * 0.25 + 0.06) * DPR,
         vx: (Math.random() - 0.5) * 0.12 * DPR,
-        a: Math.random() * 0.50 + 0.18, ph: Math.random() * 6.28          // brighter (range 0.18-0.68)
+        a: Math.random() * 0.65 + 0.30, ph: Math.random() * 6.28          // L: intense color (0.30-0.95)
       });
     }
     build();
@@ -58,6 +58,8 @@
       var v = Temp.step(), col = Temp.rgb(v);
       // clear to transparent each frame so the Landing.png background shows through
       x.clearRect(0, 0, W, H);
+      // additive blending → overlapping embers add up to bright bloom (fire glow)
+      x.globalCompositeOperation = 'lighter';
       root.setProperty('--temp',      'rgb(' + col[0] + ',' + col[1] + ',' + col[2] + ')');
       root.setProperty('--temp-soft', 'rgba(' + col[0] + ',' + col[1] + ',' + col[2] + ',.5)');
       for (var i = 0; i < bits.length; i++) {

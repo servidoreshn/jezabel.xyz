@@ -44,10 +44,10 @@
       background-size:cover;background-position:center top;
       background-attachment:fixed;background-repeat:no-repeat;
     }
-    /* dark scrim — transparent at very top (hero shows Landing.png cleanly),
-       darker further down so non-hero sections (manifesto/features/pricing) stay legible */
+    /* dark scrim — sits BELOW the ember canvas (z:-1) so particles paint on top
+       of it, not muffled by it. Darkens only the body bg-image (Landing.png). */
     .bg-scrim{
-      position:fixed;inset:0;z-index:0;pointer-events:none;
+      position:fixed;inset:0;z-index:-1;pointer-events:none;
       background:linear-gradient(180deg,rgba(8,10,14,0) 0%,rgba(8,10,14,0.15) 35%,rgba(8,10,14,0.7) 75%,rgba(8,10,14,0.92) 100%);
     }
     /* ember canvas injected by embers.js sits at z-index:0 (above scrim, below content) */
