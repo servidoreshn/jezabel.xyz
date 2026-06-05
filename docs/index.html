@@ -39,11 +39,18 @@
     body{
       font-family:'Rajdhani',sans-serif;background:var(--black);color:var(--text);
       font-size:16px;line-height:1.6;letter-spacing:0.3px;overflow-x:hidden;
-      background-image:
-        linear-gradient(135deg,#0a0c0e 0%,#0e1218 100%),
-        radial-gradient(ellipse at 80% -10%,rgba(255,41,41,0.10),transparent 50%),
-        radial-gradient(ellipse at 20% 110%,rgba(255,43,214,0.10),transparent 50%);
     }
+    /* fixed Landing.png background — skycastle-style full-viewport bg.
+       darker scrim layered on top for text readability over the image */
+    .bg-fixed{
+      position:fixed;inset:0;z-index:-2;pointer-events:none;
+      background:url('assets/Landing.png') center/cover no-repeat;
+    }
+    .bg-scrim{
+      position:fixed;inset:0;z-index:-1;pointer-events:none;
+      background:linear-gradient(180deg,rgba(8,10,14,0.55) 0%,rgba(8,10,14,0.72) 40%,rgba(8,10,14,0.88) 100%);
+    }
+    /* ember canvas injected by embers.js sits at z-index:0 (above scrim, below content) */
     body::before{
       content:'';position:fixed;inset:0;pointer-events:none;z-index:200;
       background:repeating-linear-gradient(0deg,transparent 0,transparent 3px,rgba(255,41,41,0.013) 3px,rgba(255,41,41,0.013) 4px);
@@ -87,18 +94,15 @@
     .nav-cta:hover{background:var(--red);color:var(--black)!important;box-shadow:0 0 18px rgba(255,41,41,0.55)}
 
     /* ─ HERO ─ */
-    .content-area{padding-top:72px}
+    .content-area{padding-top:72px;position:relative;z-index:1}
+    .header{z-index:50}
+    footer{position:relative;z-index:1}
     .hero{
       position:relative;min-height:90vh;display:flex;flex-direction:column;
       align-items:center;justify-content:center;text-align:center;padding:60px 24px 80px;
     }
-    .hero-image{
-      display:block;width:100%;max-width:1100px;height:auto;margin:0 auto 36px;
-      border:1px solid var(--red);
-      box-shadow:0 24px 70px rgba(0,0,0,0.7),0 0 60px rgba(255,41,41,0.25),0 0 0 1px rgba(255,41,41,0.2);
-      clip-path:polygon(16px 0,100% 0,100% calc(100% - 16px),calc(100% - 16px) 100%,0 100%,0 16px);
-      animation:fade-up 1s ease 0.05s backwards;
-    }
+    /* hero now sits over the fixed Landing.png + ember bg; no inline img element */
+    .hero{min-height:100vh}
     .hero-eyebrow{
       font-family:'Orbitron',sans-serif;font-weight:700;font-size:11px;letter-spacing:5px;
       color:var(--cyan);text-transform:uppercase;margin-bottom:20px;
@@ -367,6 +371,10 @@
 </head>
 <body>
 
+<!-- FIXED BACKGROUND LAYERS: Landing.png + dark scrim. Ember canvas auto-injects via embers.js -->
+<div class="bg-fixed"></div>
+<div class="bg-scrim"></div>
+
 <!-- HEADER -->
 <header class="header">
     <div class="header-brand">
@@ -386,7 +394,6 @@
 
     <!-- HERO -->
     <section class="hero">
-        <img class="hero-image" src="assets/og-image.jpg" alt="jezabel — cyberpunk DAE companions" width="1200" height="630">
         <p class="hero-eyebrow">⟨ DIGITAL AUTOMATA ENTITIES · FOR THOSE WHO DEMAND MORE ⟩</p>
         <h1 class="hero-title">
             JEZABEL
@@ -633,6 +640,8 @@
     <p class="footer-copy">© 2025 LEMPYRΛ · HONDURAS · QUANTUM-SECURED CLOUD INFRASTRUCTURE</p>
 </footer>
 
+<!-- ember canvas — vendored from storiesbyjez.com/html/snake-bg.js, drifts scarlet→magenta→orange embers -->
+<script src="assets/embers.js" defer></script>
 <script>
 // reveal on scroll
 var io=new IntersectionObserver(function(ents){
