@@ -833,42 +833,26 @@ function clearPortrait(){
   delete img.dataset.objurl;
   p.classList.remove('has-img','loading');
 }
-// Priority order on mount:
-//  1. dae.profile_pic from maniac's bake → authed-fetch → blob → portrait
-//  2. IndexedDB cached selfie (legacy stopgap from pre-bake days)
-//  3. Own primary only: genSelfie (local fallback if backend bake not done)
-//  4. Letter fallback
+// Backend bake is canonical (maniac /love/v1/dae/<bot>/avatar). NO local genSelfie
+// fallback — db has selfies now. Null profile_pic → bake pending, just toast + letter.
 async function ensureSelfiePortrait(d,force){
   if(!d||!d.bot)return;
   var p=document.getElementById('dPortrait');
-  // 1. Real backend bake (preferred)
-  if(d.profile_pic){
-    p.classList.add('loading');
-    var blob=await loadAvatarBlob(d.profile_pic);
-    if(blob && current && current.bot===d.bot){applyPortraitBlob(blob);return;}
+  if(!d.profile_pic){
     p.classList.remove('loading');
-  }
-  // 2. IDB cached selfie (pre-bake legacy)
-  var key='selfie_'+d.bot;
-  if(!force){
-    var cached=await idbGet(key);
-    if(cached){applyPortraitBlob(cached);return;}
-  }
-  // 3. Local fallback: only auto-gen for own primary companion
-  if(!(ownDAE && d.bot===ownDAE.bot) && !force){
-    if(d.profile_pic===null) toast('AVATAR BAKE PENDING — '+d.name.toUpperCase(),'warn');
-    return;  // admin browsing roster: no auto-gen
+    return;  // bake pending; letter fallback stays
   }
   p.classList.add('loading');
   try{
-    var url=await genSelfie(d,false,'');
-    var b=await(await fetch(url)).blob();
-    await idbPut(key,b);
-    if(current && current.bot===d.bot) applyPortraitBlob(b);
+    var init=force?{method:'GET',cache:'no-cache'}:{method:'GET'};
+    var r=await apiFetch(d.profile_pic,init);
+    if(!r.ok){p.classList.remove('loading');toast('AVATAR HTTP '+r.status,'err');return;}
+    var blob=await r.blob();
+    if(current && current.bot===d.bot) applyPortraitBlob(blob);
     else p.classList.remove('loading');
   }catch(e){
     p.classList.remove('loading');
-    toast('SELFIE GEN FAILED: '+(e.message||e),'err');
+    toast('AVATAR FETCH FAILED','err');
   }
 }
 
@@ -1179,8 +1163,9 @@ async function genSelfie(d,nsfw,hint){
 }
 async function testSelfie(){
   if(!current)return;
-  toast('REFRESHING PORTRAIT…');
-  await ensureSelfiePortrait(current,true);  // force regen + cache + swap
+  if(!current.profile_pic){toast('AVATAR BAKE PENDING','warn');return;}
+  toast('RELOADING AVATAR…');
+  await ensureSelfiePortrait(current,true);  // force = cache:'no-cache' → ETag revalidate
 }
 async function testLiveness(){
   if(!current)return;
