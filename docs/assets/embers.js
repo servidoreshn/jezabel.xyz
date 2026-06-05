@@ -39,14 +39,14 @@
       H = c.height = window.innerHeight * DPR;
       c.style.width  = window.innerWidth  + 'px';
       c.style.height = window.innerHeight + 'px';
-      var n = Math.floor(window.innerWidth * window.innerHeight / 18500);  // +30% density vs prev /24000
+      var n = Math.floor(window.innerWidth * window.innerHeight / 13000);  // density bump
       bits = [];
       for (var i = 0; i < n; i++) bits.push({
         x: Math.random() * W, y: Math.random() * H,
-        r: (Math.random() * 1.55 + 0.4) * DPR,                          // slightly larger
+        r: (Math.random() * 1.8 + 0.5) * DPR,                            // larger embers
         vy: -(Math.random() * 0.25 + 0.06) * DPR,
         vx: (Math.random() - 0.5) * 0.12 * DPR,
-        a: Math.random() * 0.36 + 0.12, ph: Math.random() * 6.28        // +30% brightness vs prev *0.28+0.08
+        a: Math.random() * 0.50 + 0.18, ph: Math.random() * 6.28          // brighter (range 0.18-0.68)
       });
     }
     build();
@@ -67,7 +67,7 @@
         var fl = b.a * (0.6 + 0.4 * Math.sin(t * 2 + b.ph));
         x.beginPath(); x.arc(b.x, b.y, b.r, 0, 6.2832);
         x.fillStyle = 'rgba(' + col[0] + ',' + col[1] + ',' + col[2] + ',' + fl + ')';
-        x.shadowBlur = 7 * DPR; x.shadowColor = 'rgba(' + col[0] + ',' + col[1] + ',' + col[2] + ',.55)';  // +30% halo intensity
+        x.shadowBlur = 10 * DPR; x.shadowColor = 'rgba(' + col[0] + ',' + col[1] + ',' + col[2] + ',.75)';  // bolder halo
         x.fill(); x.shadowBlur = 0;
       }
       requestAnimationFrame(frame);
