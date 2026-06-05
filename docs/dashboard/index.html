@@ -95,8 +95,47 @@ input,textarea{font-family:'Rajdhani',sans-serif}
 .empty .big{font-family:'Orbitron',sans-serif;font-size:24px;letter-spacing:5px;color:var(--red);text-transform:uppercase;display:block;margin-bottom:18px}
 .empty .sub{font-size:14px;letter-spacing:1px;color:var(--muted)}
 
-/* COMPANION VIEW — character-sheet layout */
-.sheet{display:grid;grid-template-columns:340px 1fr;gap:24px}
+/* COMPANION VIEW — MY COMPANIONS split: vertical own-list + character-sheet detail */
+.my-companions-wrap{display:flex;gap:22px;align-items:flex-start;max-width:1280px;margin:0 auto}
+.own-list{
+  width:230px;flex-shrink:0;background:var(--surface);border:1px solid var(--magenta-dim);
+  padding:14px;display:flex;flex-direction:column;gap:8px;position:sticky;top:24px;
+  max-height:calc(100vh - 180px);overflow-y:auto;
+  clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);
+}
+.own-list::-webkit-scrollbar{width:6px}
+.own-list::-webkit-scrollbar-thumb{background:var(--magenta);box-shadow:0 0 4px var(--magenta)}
+.own-list-title{
+  font-family:'Orbitron',sans-serif;font-weight:800;font-size:11px;letter-spacing:3px;
+  color:var(--magenta);text-transform:uppercase;padding:6px 10px;margin-bottom:4px;
+  border-left:3px solid var(--magenta);text-shadow:0 0 8px rgba(255,43,214,0.4);
+}
+.own-btn{
+  --tc:var(--red);--tcg:rgba(255,41,41,0.4);--td:var(--text);
+  display:flex;flex-direction:column;align-items:flex-start;gap:3px;
+  padding:11px 14px;background:var(--void);border:1px solid var(--line);
+  color:var(--text);text-align:left;cursor:pointer;transition:all 0.15s;
+  font-family:'Orbitron',sans-serif;width:100%;
+  clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);
+}
+.own-name{font-weight:800;font-size:13px;letter-spacing:2px;text-transform:uppercase}
+.own-id{font-size:9px;letter-spacing:2px;color:var(--muted);font-weight:600}
+.own-btn:hover{border-color:var(--tc);transform:translateX(3px);color:var(--tc)}
+.own-btn:hover .own-id{color:var(--tc)}
+.own-btn.selected{
+  border-color:var(--tc);background:linear-gradient(90deg,rgba(255,255,255,0.05),transparent);
+  box-shadow:0 0 14px var(--tcg),inset 0 0 16px var(--tcg);
+  transform:translateX(6px) scale(1.04);
+}
+.own-btn.selected .own-name{color:var(--tc);text-shadow:0 0 8px var(--tc)}
+.own-btn.selected .own-id{color:var(--td)}
+
+.sheet{display:grid;grid-template-columns:340px 1fr;gap:24px;flex:1;min-width:0}
+@media(max-width:980px){
+  .my-companions-wrap{flex-direction:column}
+  .own-list{width:100%;position:static;max-height:none;flex-direction:row;overflow-x:auto;overflow-y:hidden}
+  .own-btn{min-width:160px;flex-shrink:0}
+}
 .portrait-card{
   background:var(--surface);border:1px solid var(--cyan-dim);padding:24px;display:flex;flex-direction:column;gap:20px;
   position:relative;
@@ -115,8 +154,18 @@ input,textarea{font-family:'Rajdhani',sans-serif}
   z-index:1;opacity:0;transition:opacity 0.4s;
 }
 .portrait-img.visible{opacity:1}
-.portrait.has-img > span,.portrait.has-img{text-shadow:none}
-.portrait.has-img > span{display:none}
+/* letter STAYS visible over the loaded portrait — large temperature-glow stamp */
+.portrait.has-img > span{
+  position:relative;z-index:3;
+  color:var(--tc,var(--red));opacity:0.92;
+  text-shadow:
+    0 0 30px var(--tc,var(--red)),
+    0 0 10px rgba(0,0,0,0.85),
+    -2px -2px 0 rgba(0,0,0,0.75),
+    2px -2px 0 rgba(0,0,0,0.75),
+    -2px 2px 0 rgba(0,0,0,0.75),
+    2px 2px 0 rgba(0,0,0,0.75);
+}
 .portrait.loading::after{
   content:'GENERATING SELFIE…';
   position:absolute;bottom:16px;left:50%;transform:translateX(-50%);z-index:3;
@@ -396,7 +445,17 @@ input,textarea{font-family:'Rajdhani',sans-serif}
   text-shadow:0 0 24px var(--tc);transition:opacity 0.3s;
 }
 .card-bg.letter-only{font-size:96px;opacity:0.45}
-.card-bg.loaded{font-size:0;text-shadow:none}
+/* letter STAYS visible over portrait — glowing temperature-color stamp with dark halo */
+.card-bg.loaded{
+  font-size:88px;color:var(--tc);opacity:0.9;
+  text-shadow:
+    0 0 22px var(--tc),
+    0 0 6px rgba(0,0,0,0.85),
+    -1px -1px 0 rgba(0,0,0,0.75),
+    1px -1px 0 rgba(0,0,0,0.75),
+    -1px 1px 0 rgba(0,0,0,0.75),
+    1px 1px 0 rgba(0,0,0,0.75);
+}
 .card-vignette{
   position:absolute;inset:0;pointer-events:none;
   background:linear-gradient(180deg,transparent 0%,transparent 40%,rgba(0,0,0,0.55) 80%,rgba(0,0,0,0.9) 100%);
@@ -512,17 +571,19 @@ input,textarea{font-family:'Rajdhani',sans-serif}
 </div>
 
 <div class="tabs">
-  <button class="tab active" data-tab="companion" onclick="setTab('companion')"><span class="ic">◆</span>MY COMPANION</button>
+  <button class="tab active" data-tab="companion" onclick="setTab('companion')"><span class="ic">◆</span>MY COMPANIONS</button>
   <button class="tab hidden" data-tab="roster" id="tabRoster" onclick="setTab('roster')"><span class="ic">⌕</span>ROSTER</button>
   <button class="tab hidden" data-tab="new" id="tabNew" onclick="setTab('new')"><span class="ic">+</span>NEW DAE</button>
 </div>
 
 <div class="main">
 
-  <!-- COMPANION VIEW -->
+  <!-- COMPANION VIEW (MY COMPANIONS) -->
   <div class="view active" id="vCompanion">
-    <div class="empty" id="emptyState"><span class="big">NO COMPANION BOUND</span><div class="sub">user-side creation parked behind admin C&C</div></div>
-    <div class="sheet" id="sheet" style="display:none">
+    <div class="empty" id="emptyState"><span class="big">NO COMPANIONS BOUND</span><div class="sub">user-side creation parked behind admin C&C</div></div>
+    <div class="my-companions-wrap" id="myCompanionsWrap" style="display:none">
+    <aside class="own-list" id="ownList"></aside>
+    <div class="sheet" id="sheet">
       <div class="portrait-card">
         <div class="portrait" id="dPortrait" style="position:relative">
           <img class="portrait-img" id="dPortraitImg" alt="">
@@ -562,6 +623,7 @@ input,textarea{font-family:'Rajdhani',sans-serif}
           <div class="recipes" id="recipes"></div>
         </div>
       </div>
+    </div>
     </div>
   </div>
 
@@ -812,6 +874,7 @@ async function ensureSelfiePortrait(d,force){
 
 // ─ STATE ─
 var current=null, ownDAE=null, allDAEs=[], filter={q:'',role:'',platform:''};
+var myCompanions=[];  // all DAEs owned by caller (Master sees own list; users see theirs)
 var viewMode='strip';  // 'strip' (default ALL linked-list) | 'grid'
 var sortMode='az';     // 'az' | 'za' (more options later — 'used' etc.)
 
@@ -832,7 +895,9 @@ function mountDAE(d){
   var pc=document.querySelector('.portrait-card');
   if(pc){pc.style.setProperty('--tc',t.border);pc.style.setProperty('--tcg',t.glow);pc.style.setProperty('--td',t.data);pc.style.setProperty('--tt',t.tint);}
   document.getElementById('emptyState').style.display='none';
+  document.getElementById('myCompanionsWrap').style.display='flex';
   document.getElementById('sheet').style.display='grid';
+  renderOwnList();  // refresh sidebar selection highlight
   document.getElementById('dPortraitLetter').textContent=(d.name||'?').charAt(0).toUpperCase();
   document.getElementById('dName').textContent=(d.name||'—').toUpperCase();
   document.getElementById('dBot').textContent=d.bot;
@@ -868,6 +933,37 @@ function renderRecipes(){
 async function loadOwnCompanion(){
   if(!ownDAE){toast('NO COMPANION BOUND','warn');return;}
   mountDAE(ownDAE);
+}
+
+// ─ MY COMPANIONS sidebar ─
+async function loadMyCompanions(){
+  var res=await fetchMyDAEs();
+  myCompanions=res.items||[];
+  if(res.stub) toast('(STUB) /LOVE/V1/DAES?OWNER=SELF PENDING — USING MOCK','warn');
+  renderOwnList();
+}
+function renderOwnList(){
+  var el=document.getElementById('ownList');if(!el)return;
+  if(!myCompanions.length){
+    el.innerHTML='<div class="own-list-title">▣ MY COMPANIONS · 0</div>'+
+      '<div style="font-size:11px;color:var(--muted);letter-spacing:1px;padding:14px">no companions bound</div>';
+    return;
+  }
+  el.innerHTML='<div class="own-list-title">▣ MY COMPANIONS · '+myCompanions.length+'</div>'+
+    myCompanions.map(function(d){
+      var t=tempFor(d.bot);
+      var sel=(current && current.bot===d.bot)?' selected':'';
+      return '<button class="own-btn'+sel+'" data-bot="'+d.bot+'" '+
+        'style="--tc:'+t.border+';--tcg:'+t.glow+';--td:'+t.data+'" '+
+        'onclick="pickOwn('+d.bot+')">'+
+        '<span class="own-name">'+escHtml(d.name)+'</span>'+
+        '<span class="own-id">#'+d.bot+' · '+(d.platform||'?').toUpperCase()+' · '+t.key.toUpperCase()+'</span>'+
+        '</button>';
+    }).join('');
+}
+function pickOwn(bot){
+  var d=myCompanions.find(function(x){return x.bot===bot;});
+  if(d)mountDAE(d);
 }
 
 // ─ ROSTER ─
@@ -1163,8 +1259,12 @@ wireHold('holdL',-1);wireHold('holdR',1);
 (async function(){
   buildChips();
   setView(viewMode);  // ensure CSS class + arrow visibility align with default
-  ownDAE=await fetchOwnDAE();
-  if(ownDAE)mountDAE(ownDAE);
+  ownDAE=await fetchOwnDAE();  // single primary for back-pill semantics
+  await loadMyCompanions();    // populates sidebar (ROSTER will only pull for Master)
+  // mount priority: own primary > first of mine
+  if(ownDAE && myCompanions.find(function(d){return d.bot===ownDAE.bot;})) mountDAE(ownDAE);
+  else if(ownDAE) mountDAE(ownDAE);
+  else if(myCompanions.length) mountDAE(myCompanions[0]);
 })();
 </script>
 </body>
