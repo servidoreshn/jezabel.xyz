@@ -37,18 +37,18 @@
     *{margin:0;padding:0;box-sizing:border-box}
     html{scroll-behavior:smooth}
     body{
-      font-family:'Rajdhani',sans-serif;background:var(--black);color:var(--text);
+      font-family:'Rajdhani',sans-serif;color:var(--text);
       font-size:16px;line-height:1.6;letter-spacing:0.3px;overflow-x:hidden;
+      background-color:var(--black);
+      background-image:url('assets/Landing.png');
+      background-size:cover;background-position:center top;
+      background-attachment:fixed;background-repeat:no-repeat;
     }
-    /* fixed Landing.png background — skycastle-style full-viewport bg.
-       darker scrim layered on top for text readability over the image */
-    .bg-fixed{
-      position:fixed;inset:0;z-index:-2;pointer-events:none;
-      background:url('assets/Landing.png') center/cover no-repeat;
-    }
+    /* dark scrim — transparent at very top (hero shows Landing.png cleanly),
+       darker further down so non-hero sections (manifesto/features/pricing) stay legible */
     .bg-scrim{
-      position:fixed;inset:0;z-index:-1;pointer-events:none;
-      background:linear-gradient(180deg,rgba(8,10,14,0.55) 0%,rgba(8,10,14,0.72) 40%,rgba(8,10,14,0.88) 100%);
+      position:fixed;inset:0;z-index:0;pointer-events:none;
+      background:linear-gradient(180deg,rgba(8,10,14,0) 0%,rgba(8,10,14,0.15) 35%,rgba(8,10,14,0.7) 75%,rgba(8,10,14,0.92) 100%);
     }
     /* ember canvas injected by embers.js sits at z-index:0 (above scrim, below content) */
     body::before{
@@ -371,8 +371,7 @@
 </head>
 <body>
 
-<!-- FIXED BACKGROUND LAYERS: Landing.png + dark scrim. Ember canvas auto-injects via embers.js -->
-<div class="bg-fixed"></div>
+<!-- dark scrim over body bg (Landing.png) for non-hero text legibility. Ember canvas auto-injects via embers.js -->
 <div class="bg-scrim"></div>
 
 <!-- HEADER -->

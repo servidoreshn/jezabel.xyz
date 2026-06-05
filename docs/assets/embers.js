@@ -56,8 +56,8 @@
     function frame() {
       t += 0.016;
       var v = Temp.step(), col = Temp.rgb(v);
-      x.fillStyle = 'rgba(10,8,8,0.16)';   // soft trail / fade
-      x.fillRect(0, 0, W, H);
+      // clear to transparent each frame so the Landing.png background shows through
+      x.clearRect(0, 0, W, H);
       root.setProperty('--temp',      'rgb(' + col[0] + ',' + col[1] + ',' + col[2] + ')');
       root.setProperty('--temp-soft', 'rgba(' + col[0] + ',' + col[1] + ',' + col[2] + ',.5)');
       for (var i = 0; i < bits.length; i++) {
