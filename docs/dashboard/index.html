@@ -572,7 +572,7 @@ input,textarea{font-family:'Rajdhani',sans-serif}
 
 <div class="tabs">
   <button class="tab active" data-tab="companion" onclick="setTab('companion')"><span class="ic">◆</span>MY COMPANIONS</button>
-  <button class="tab hidden" data-tab="roster" id="tabRoster" onclick="setTab('roster')"><span class="ic">⌕</span>ROSTER</button>
+  <button class="tab hidden" data-tab="roster" id="tabRoster" onclick="setTab('roster')"><span class="ic">⌕</span>SEARCH</button>
   <button class="tab hidden" data-tab="new" id="tabNew" onclick="setTab('new')"><span class="ic">+</span>NEW DAE</button>
 </div>
 
@@ -852,25 +852,33 @@ function clearPortrait(){
   p.classList.remove('has-img','loading');
 }
 // Backend bake is canonical (maniac /love/v1/dae/<bot>/avatar). NO local genSelfie
-// fallback — db has selfies now. Null profile_pic → bake pending, just toast + letter.
+// fallback — db has selfies now. If list endpoint omits profile_pic, enrich on demand.
 async function ensureSelfiePortrait(d,force){
   if(!d||!d.bot)return;
   var p=document.getElementById('dPortrait');
+  p.classList.add('loading');
+  // Enrich: if list response didn't carry profile_pic, fetch the full DAE
+  if(!d.profile_pic){
+    var full=await fetchDAEByBot(d.bot);
+    if(full && full.profile_pic){
+      d.profile_pic=full.profile_pic;
+      if(current && current.bot===d.bot) current.profile_pic=full.profile_pic;
+    }
+  }
   if(!d.profile_pic){
     p.classList.remove('loading');
-    return;  // bake pending; letter fallback stays
+    return;  // truly null → bake pending; letter fallback stays
   }
-  p.classList.add('loading');
   try{
     var init=force?{method:'GET',cache:'no-cache'}:{method:'GET'};
     var r=await apiFetch(d.profile_pic,init);
-    if(!r.ok){p.classList.remove('loading');toast('AVATAR HTTP '+r.status,'err');return;}
+    if(!r.ok){p.classList.remove('loading');toast('AVATAR HTTP '+r.status+' on bot '+d.bot,'err');return;}
     var blob=await r.blob();
     if(current && current.bot===d.bot) applyPortraitBlob(blob);
     else p.classList.remove('loading');
   }catch(e){
     p.classList.remove('loading');
-    toast('AVATAR FETCH FAILED','err');
+    toast('AVATAR FETCH FAILED on bot '+d.bot,'err');
   }
 }
 
@@ -914,9 +922,8 @@ function mountDAE(d){
   renderRecipes();
   document.getElementById('backPill').classList.toggle('visible',IS_ADMIN && ownDAE && current.bot !== ownDAE.bot);
   setTab('companion');
-  // auto-pull/cache selfie portrait when viewing own primary companion
-  if(ownDAE && d.bot===ownDAE.bot) ensureSelfiePortrait(d,false);
-  else { idbGet('selfie_'+d.bot).then(function(blob){ if(blob && current && current.bot===d.bot) applyPortraitBlob(blob); }); }
+  // pull portrait from backend bake — works for any DAE, enriches if list omitted profile_pic
+  ensureSelfiePortrait(d,false);
 }
 function renderRecipes(){
   var el=document.getElementById('recipes');
@@ -941,7 +948,8 @@ async function loadOwnCompanion(){
 async function loadMyCompanions(){
   var res=await fetchMyDAEs();
   myCompanions=res.items||[];
-  if(res.stub) toast('(STUB) /LOVE/V1/DAES?OWNER=SELF PENDING — USING MOCK','warn');
+  if(res.stub) toast('MINE: STUB FALLBACK ('+myCompanions.length+') — API FAILED','warn');
+  else toast('MINE: '+myCompanions.length+' COMPANIONS','ok');
   renderOwnList();
 }
 function renderOwnList(){
@@ -973,7 +981,8 @@ async function loadAll(){
   var res=await fetchAllDAEs();
   if(res.forbidden){document.getElementById('tabRoster').classList.add('hidden');setTab('companion');return;}
   allDAEs=res.items||[];
-  if(res.stub) toast('(STUB) /LOVE/V1/DAES PENDING — USING MOCK','warn');
+  if(res.stub) toast('SEARCH: STUB FALLBACK ('+allDAEs.length+') — API FAILED','warn');
+  else toast('SEARCH: '+allDAEs.length+' DAES TOTAL','ok');
   renderResults();
 }
 function setView(m){
@@ -1218,16 +1227,20 @@ wireHold('holdL',-1);wireHold('holdR',1);
 // ─ DESKTOP scroll: wheel → horizontal + click-and-drag ─
 (function(){
   var strip=document.getElementById('results');if(!strip)return;
-  // Mouse wheel → horizontal scroll (only when strip view)
-  // Inverted per L's spec: wheel UP → carousel scrolls LEFT (earlier cards),
-  //                        wheel DOWN → carousel scrolls RIGHT (later cards)
-  // deltaY positive = wheel down → scrollLeft increases (viewport moves right)
+  // Mouse wheel → horizontal scroll (strip view only, when there's overflow)
+  // Inverted per L: wheel UP → carousel LEFT, wheel DOWN → carousel RIGHT.
+  // Handles all 3 deltaModes (pixel/line/page) so trackpad + mouse + Windows
+  // wheels all feel consistent. Guards scrollWidth so we don't block vertical
+  // page scroll when the strip already fits the viewport.
   strip.addEventListener('wheel',function(e){
     if(viewMode!=='strip')return;
-    if(Math.abs(e.deltaY)>Math.abs(e.deltaX)){
-      e.preventDefault();
-      strip.scrollLeft+=e.deltaY;  // up→left, down→right per L
-    }
+    if(strip.scrollWidth <= strip.clientWidth + 1)return;  // nothing to scroll
+    var dy=e.deltaY;
+    if(e.deltaMode===1) dy*=24;   // DOM_DELTA_LINE ≈ 24px/line
+    else if(e.deltaMode===2) dy*=600;  // DOM_DELTA_PAGE
+    if(dy===0)return;
+    e.preventDefault();
+    strip.scrollLeft+=dy;  // up→left, down→right per L
   },{passive:false});
   // Click-and-drag → scroll
   var drag={active:false,startX:0,scrollStart:0,moved:0};
