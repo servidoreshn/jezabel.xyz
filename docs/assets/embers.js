@@ -39,14 +39,14 @@
       H = c.height = window.innerHeight * DPR;
       c.style.width  = window.innerWidth  + 'px';
       c.style.height = window.innerHeight + 'px';
-      var n = Math.floor(window.innerWidth * window.innerHeight / 14000);
+      var n = Math.floor(window.innerWidth * window.innerHeight / 24000);  // sparser (was /14000)
       bits = [];
       for (var i = 0; i < n; i++) bits.push({
         x: Math.random() * W, y: Math.random() * H,
-        r: (Math.random() * 1.6 + 0.4) * DPR,
+        r: (Math.random() * 1.4 + 0.3) * DPR,                          // slightly smaller
         vy: -(Math.random() * 0.25 + 0.06) * DPR,
         vx: (Math.random() - 0.5) * 0.12 * DPR,
-        a: Math.random() * 0.5 + 0.2, ph: Math.random() * 6.28
+        a: Math.random() * 0.28 + 0.08, ph: Math.random() * 6.28        // softer (was *0.5+0.2)
       });
     }
     build();
@@ -67,7 +67,7 @@
         var fl = b.a * (0.6 + 0.4 * Math.sin(t * 2 + b.ph));
         x.beginPath(); x.arc(b.x, b.y, b.r, 0, 6.2832);
         x.fillStyle = 'rgba(' + col[0] + ',' + col[1] + ',' + col[2] + ',' + fl + ')';
-        x.shadowBlur = 8 * DPR; x.shadowColor = 'rgba(' + col[0] + ',' + col[1] + ',' + col[2] + ',.7)';
+        x.shadowBlur = 5 * DPR; x.shadowColor = 'rgba(' + col[0] + ',' + col[1] + ',' + col[2] + ',.4)';  // softer halo
         x.fill(); x.shadowBlur = 0;
       }
       requestAnimationFrame(frame);
