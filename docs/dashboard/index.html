@@ -409,7 +409,13 @@ input,textarea{font-family:'Rajdhani',sans-serif}
 .recipe.editing .recipe-neg-clear{display:inline-flex}
 
 /* model field autocomplete — wider input with datalist */
-.recipe.editing .recipe-head .model-edit{width:100%;max-width:520px;font-family:'Rajdhani',sans-serif;font-size:12px}
+.recipe.editing .recipe-head .model-edit{width:100%;max-width:520px;font-family:'Rajdhani',sans-serif;font-size:13px;border-color:var(--cyan-dim);background:var(--surface)}
+.recipe.editing .recipe-head .model-edit:focus{border-color:var(--cyan);box-shadow:0 0 0 1px rgba(61,240,255,0.25)}
+.model-edit-lbl{display:none}
+.recipe.editing .model-edit-lbl{
+  display:inline-flex;align-items:center;font-family:'Orbitron',sans-serif;font-weight:700;
+  font-size:9.5px;letter-spacing:2.5px;color:var(--cyan);text-transform:uppercase;
+}
 
 .bindings{display:flex;flex-direction:column;gap:8px}
 .binding{
@@ -1130,7 +1136,8 @@ function renderRecipes(){
           '<button class="cancel-mini" onclick="cancelRecipeEdit(\''+escAttr(v)+'\')">× CANCEL</button>'+
         '</div>' : '';
     var modelInput=editable
-      ? '<input class="rw-input model-edit" data-rv="'+escAttr(v)+'-model" type="text" list="imgModels" value="'+escHtml(r.model||'')+'" placeholder="model.safetensors — type or pick from ↓">' : '';
+      ? '<span class="model-edit-lbl">MODEL ▸</span>'+
+        '<input class="rw-input model-edit" data-rv="'+escAttr(v)+'-model" type="text" list="imgModels" value="'+escAttr(r.model||'')+'" placeholder="model.safetensors — type or pick from ↓">' : '';
     var posEdit=editable
       ? '<textarea class="rw-textarea" data-rv="'+escAttr(v)+'-pos" rows="5" placeholder="positive prompt">'+escHtml(r.positive_prompt||'')+'</textarea>' : '';
     var negEdit=editable
@@ -1309,16 +1316,26 @@ async function saveRecipe(variant){
     if(r && r.dryRunCancelled){toast('DRY-RUN · PUT RECIPE['+variant.toUpperCase()+'] DISMISSED','warn');return;}
     if(!r.ok){_toastForStatus('PUT RECIPE['+variant+']',r.status);return;}
     var saved=await r.json();
-    // merge into current.recipes; preserve any other variants untouched
+    // merge into current.recipes; preserve any other variants untouched.
+    // Precedence: server echo > what we just sent (body) > previous value.
+    //   The body-fallback is the bug fix — if the backend doesn't echo a
+    //   field, we still trust what we sent so the UI doesn't snap back to
+    //   the old value (which made the editor look like saves never took).
+    function _pick(serverV, bodyV, origV){
+      if(serverV!=null && serverV!=='') return serverV;
+      if(bodyV   !=null) return bodyV;            // bodyV can be '' on purpose
+      return origV||'';
+    }
     current.recipes=(current.recipes||[]).filter(function(x){return x.variant!==variant;});
     current.recipes.push({
-      variant:saved.variant||variant,
-      model:saved.model||orig.model||'',
-      positive_prompt:saved.positive_prompt!=null?saved.positive_prompt:orig.positive_prompt||'',
-      negative_prompt:saved.negative_prompt!=null?saved.negative_prompt:orig.negative_prompt||''
+      variant: saved.variant || variant,
+      model:           _pick(saved.model,           body.model,           orig.model),
+      positive_prompt: _pick(saved.positive_prompt, body.positive_prompt, orig.positive_prompt),
+      negative_prompt: _pick(saved.negative_prompt, body.negative_prompt, orig.negative_prompt)
     });
     renderRecipes();
-    toast('RECIPE['+variant.toUpperCase()+'] SAVED','ok');
+    var sentKeys=Object.keys(body).filter(function(k){return k!=='bot'&&k!=='variant';});
+    toast('RECIPE['+variant.toUpperCase()+'] SAVED · '+sentKeys.join('+'),'ok');
   }catch(e){toast('PUT RECIPE FAILED: '+(e.message||e),'err');console.error(e);}
   finally{ctrls.forEach(function(b){b.disabled=false;});}
 }
