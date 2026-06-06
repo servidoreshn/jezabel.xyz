@@ -24,13 +24,11 @@ body{
   background-size:cover;background-position:center;
   background-attachment:fixed;background-repeat:no-repeat;
 }
-/* dark scrim — sits above bg image, below UI for legibility */
+/* dark scrim — sits BELOW UI (z:-1) so cards keep their solid contrast.
+   Only dims the bg image where the main area is transparent. */
 .bg-scrim{
-  position:fixed;inset:0;pointer-events:none;z-index:1;
-  background:
-    linear-gradient(180deg,rgba(8,10,14,0.62) 0%,rgba(8,10,14,0.78) 50%,rgba(8,10,14,0.92) 100%),
-    radial-gradient(ellipse at 80% -20%,rgba(255,41,41,0.08),transparent 50%),
-    radial-gradient(ellipse at 20% 120%,rgba(255,43,214,0.07),transparent 50%);
+  position:fixed;inset:0;pointer-events:none;z-index:-1;
+  background:linear-gradient(180deg,rgba(8,10,14,0.45) 0%,rgba(8,10,14,0.60) 50%,rgba(8,10,14,0.78) 100%);
 }
 body::before{
   content:'';position:fixed;inset:0;pointer-events:none;z-index:200;
@@ -161,18 +159,10 @@ input,textarea{font-family:'Rajdhani',sans-serif}
   z-index:1;opacity:0;transition:opacity 0.4s;
 }
 .portrait-img.visible{opacity:1}
-/* letter STAYS visible over the loaded portrait — large temperature-glow stamp */
-.portrait.has-img > span{
-  position:relative;z-index:3;
-  color:var(--tc,var(--red));opacity:0.92;
-  text-shadow:
-    0 0 30px var(--tc,var(--red)),
-    0 0 10px rgba(0,0,0,0.85),
-    -2px -2px 0 rgba(0,0,0,0.75),
-    2px -2px 0 rgba(0,0,0,0.75),
-    -2px 2px 0 rgba(0,0,0,0.75),
-    2px 2px 0 rgba(0,0,0,0.75);
-}
+/* letter hidden over the loaded portrait per L 2026-06-06 — was a noisy stamp.
+   Letter still shows as the fallback when there's no image (no .has-img).
+   Roster cards keep their letter stamp via .card-bg (different selector). */
+.portrait.has-img > span{display:none}
 .portrait.loading::after{
   content:'GENERATING SELFIE…';
   position:absolute;bottom:16px;left:50%;transform:translateX(-50%);z-index:3;

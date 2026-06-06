@@ -24,13 +24,11 @@ body{
   background-size:cover;background-position:center;
   background-attachment:fixed;background-repeat:no-repeat;
 }
-/* dark scrim — sits above bg image, below panel for legibility */
+/* dark scrim — sits BELOW UI (z:-1) so panel keeps its own contrast.
+   Only dims the bg image where UI is transparent. */
 .bg-scrim{
-  position:fixed;inset:0;pointer-events:none;z-index:1;
-  background:
-    linear-gradient(180deg,rgba(8,10,14,0.55) 0%,rgba(8,10,14,0.65) 50%,rgba(8,10,14,0.88) 100%),
-    radial-gradient(ellipse at 80% -20%,rgba(255,41,41,0.10),transparent 50%),
-    radial-gradient(ellipse at 20% 120%,rgba(255,43,214,0.08),transparent 50%);
+  position:fixed;inset:0;pointer-events:none;z-index:-1;
+  background:linear-gradient(180deg,rgba(8,10,14,0.40) 0%,rgba(8,10,14,0.50) 50%,rgba(8,10,14,0.72) 100%);
 }
 body::before{
   content:'';position:fixed;inset:0;pointer-events:none;z-index:100;
