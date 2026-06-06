@@ -736,7 +736,8 @@ input,textarea{font-family:'Rajdhani',sans-serif}
         </div>
         <div class="actions">
           <button class="action-btn" onclick="openChat()"><span class="ic">▶</span> CHAT</button>
-          <button class="action-btn magenta" onclick="testSelfie()"><span class="ic">▶</span> SELFIE</button>
+          <button class="action-btn magenta" onclick="testSelfie()" title="Reload current avatar bake (ETag revalidate)"><span class="ic">▶</span> SELFIE</button>
+          <button class="action-btn magenta admin-only" id="regenSelfieBtn" onclick="regenSelfiePreview()" title="Local regen with current recipe (bake stays untouched — preview only)" style="display:none"><span class="ic">↻</span> REGEN</button>
           <button class="action-btn blue" onclick="testLiveness()"><span class="ic">▶</span> LIVENESS</button>
         </div>
       </div>
@@ -862,6 +863,9 @@ if(IS_ADMIN){
   var _rp=document.getElementById('roPill'); if(_rp) _rp.style.display='none';
   // pull img models list so the recipe model input autocompletes
   setTimeout(loadImgModels,80);
+  // REGEN PREVIEW — local /orch/img/v1/generate against current recipe so admin
+  // can eyeball recipe edits without waiting for the backend re-bake hook
+  var _rg=document.getElementById('regenSelfieBtn'); if(_rg) _rg.style.display='';
 }
 
 // ─ SAR1A / ORCH ─
@@ -1221,13 +1225,28 @@ function _editorBusy(busy){
     var el=document.getElementById(id); if(el) el.disabled=!!busy;
   });
 }
-function _toastForStatus(prefix,code){
-  if(code===400) return toast(prefix+': NOTHING TO UPDATE','warn');
+function _toastForStatus(prefix,code,detail){
+  var tail=detail?' · '+String(detail).slice(0,80):'';
+  if(code===400) return toast(prefix+': NOTHING TO UPDATE'+tail,'warn');
   if(code===401) return toast(prefix+': SESSION EXPIRED','err');
   if(code===403) return toast(prefix+': ADMIN ONLY','err');
   if(code===404) return toast(prefix+': NO DAE WITH THAT BOT','err');
+  if(code===500) return toast(prefix+': BACKEND 500 — see console for body','err');
   if(code===503) return toast(prefix+': DB UNREACHABLE','err');
-  toast(prefix+' HTTP '+code,'err');
+  toast(prefix+' HTTP '+code+tail,'err');
+}
+// Pull a short detail string from any Response: prefer JSON {detail|error|message},
+// fall back to raw text, capped so toast stays readable. Logs the full body to
+// console so admin can copy-paste into a maniac ping.
+async function _errBody(r,prefix){
+  var t='';
+  try{
+    var ct=r.headers.get('content-type')||'';
+    if(ct.indexOf('json')>=0){var j=await r.json();t=j.detail||j.error||j.message||JSON.stringify(j);}
+    else t=await r.text();
+  }catch(_){}
+  if(t) console.error(prefix+' body:',t);
+  return t;
 }
 
 function enterEdit(){
@@ -1262,7 +1281,7 @@ async function saveDae(){
   try{
     var r=await _attemptWrite('PATCH','/love/v1/dae/'+current.bot,changes);
     if(r && r.dryRunCancelled){toast('DRY-RUN · PATCH DISMISSED','warn');return;}
-    if(!r.ok){_toastForStatus('PATCH DAE',r.status);return;}
+    if(!r.ok){var b=await _errBody(r,'PATCH DAE');_toastForStatus('PATCH DAE',r.status,b);return;}
     var updated=await r.json();
     // re-render from server-returned object (preserves recipes etc)
     if(updated && typeof updated==='object'){
@@ -1314,7 +1333,7 @@ async function saveRecipe(variant){
   try{
     var r=await _attemptWrite('PUT','/love/v1/recipe',body);
     if(r && r.dryRunCancelled){toast('DRY-RUN · PUT RECIPE['+variant.toUpperCase()+'] DISMISSED','warn');return;}
-    if(!r.ok){_toastForStatus('PUT RECIPE['+variant+']',r.status);return;}
+    if(!r.ok){var b=await _errBody(r,'PUT RECIPE['+variant+']');_toastForStatus('PUT RECIPE['+variant+']',r.status,b);return;}
     var saved=await r.json();
     // merge into current.recipes; preserve any other variants untouched.
     // Precedence: server echo > what we just sent (body) > previous value.
@@ -1660,9 +1679,36 @@ async function genSelfie(d,nsfw,hint){
 }
 async function testSelfie(){
   if(!current)return;
-  if(!current.profile_pic){toast('AVATAR BAKE PENDING','warn');return;}
+  if(!current.profile_pic){toast('AVATAR BAKE PENDING — try REGEN to preview new recipe locally','warn');return;}
   toast('RELOADING AVATAR…');
   await ensureSelfiePortrait(current,true);  // force = cache:'no-cache' → ETag revalidate
+}
+// REGEN PREVIEW — re-runs /orch/img/v1/generate against the CURRENT recipe
+// (positive_prompt + negative_prompt + model from current.recipes[selfie]) so
+// admin sees the effect of recipe edits immediately. Does NOT touch the DB
+// bake — that's maniac's re-bake hook (POST /love/v1/dae/<bot>/avatar/rebake
+// pending). Toast makes the distinction loud so admin doesn't think the
+// public selfie has changed when it hasn't.
+async function regenSelfiePreview(){
+  if(!IS_ADMIN||!current)return;
+  var recipe=recipeFor(current,'selfie');
+  if(!recipe||!recipe.positive_prompt){toast('NO SELFIE RECIPE TO REGEN','warn');return;}
+  var p=document.getElementById('dPortrait');
+  var btn=document.getElementById('regenSelfieBtn');
+  if(btn)btn.disabled=true;
+  p.classList.add('loading');
+  toast('REGEN PREVIEW · BAKE NOT TOUCHED…','warn');
+  try{
+    var url=await genSelfie(current,false,'');
+    var img=document.getElementById('dPortraitImg');
+    if(img.dataset.objurl)try{URL.revokeObjectURL(img.dataset.objurl);}catch(_){}
+    img.dataset.objurl=url;img.src=url;
+    img.onload=function(){img.classList.add('visible');p.classList.add('has-img');p.classList.remove('loading');};
+    toast('PREVIEW LOADED · public bake still old until re-bake','ok');
+  }catch(e){
+    p.classList.remove('loading');
+    toast('REGEN FAILED: '+(e.message||e),'err');console.error('regenSelfiePreview',e);
+  }finally{if(btn)btn.disabled=false;}
 }
 async function testLiveness(){
   if(!current)return;
