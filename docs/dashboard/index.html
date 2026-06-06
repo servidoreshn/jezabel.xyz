@@ -881,7 +881,12 @@ async function apiFetch(path,init){
   // X-App-ID only on orch routes; sar1a CORS for /love/v1 + /auth doesn't allow
   // the custom header in preflight, so adding it would silently fail every request
   if(path.indexOf('/orch')===0) headers['X-App-ID']=APP_ID;
-  var r=await fetch(SAR1A+path,{...init,headers:headers});
+  // Hard-disable credentials. Auth here is Bearer JWT in Authorization, never a
+  // cookie. The sar1a/orch response carries Access-Control-Allow-Origin: * which
+  // the browser REJECTS as soon as credentials are in flight ("Failed to fetch"
+  // with no status code, before any 4xx/5xx). 'omit' guarantees the browser
+  // won't auto-attach a same-site/SameSite=None cookie from a prior auth hit.
+  var r=await fetch(SAR1A+path,{...init,credentials:'omit',headers:headers});
   if(r.status===401){sessionStorage.removeItem(TK);sessionStorage.removeItem(UK);
     var b=(location.pathname.match(/^(.*\/docs\/)/)||['','/'])[1];window.location.replace(b+'login/');
     throw new Error('session expired');}
@@ -1691,19 +1696,42 @@ async function testSelfie(){
 // public selfie has changed when it hasn't.
 async function regenSelfiePreview(){
   if(!IS_ADMIN||!current)return;
-  var recipe=recipeFor(current,'selfie');
-  if(!recipe||!recipe.positive_prompt){toast('NO SELFIE RECIPE TO REGEN','warn');return;}
   var p=document.getElementById('dPortrait');
   var btn=document.getElementById('regenSelfieBtn');
   if(btn)btn.disabled=true;
   p.classList.add('loading');
-  toast('REGEN PREVIEW · BAKE NOT TOUCHED…','warn');
+  toast('PREVIEW · pulling fresh recipe from DB…','warn');
   try{
-    var url=await genSelfie(current,false,'');
-    var img=document.getElementById('dPortraitImg');
-    if(img.dataset.objurl)try{URL.revokeObjectURL(img.dataset.objurl);}catch(_){}
-    img.dataset.objurl=url;img.src=url;
-    img.onload=function(){img.classList.add('visible');p.classList.add('has-img');p.classList.remove('loading');};
+    // CANONICAL FLOW per maniac's brief:
+    //   1. GET /love/v1/dae?bot=<id>  → fresh recipe from loveDB
+    //   2. find r.variant === 'selfie'
+    //   3. POST /orch/img/v1/generate { model, prompt, negative_prompt }
+    //   4. poll /orch/img/v1/jobs/<id>  → download /orch/img/outputs/<file>
+    // The fresh fetch guarantees we render with what's actually persisted,
+    // not whatever was in current.recipes after a local save.
+    var fresh=await fetchDAEByBot(current.bot);
+    if(!fresh){throw new Error('could not refetch dae '+current.bot);}
+    var recipe=(fresh.recipes||[]).find(function(x){return x.variant==='selfie';});
+    if(!recipe||!recipe.positive_prompt){toast('NO SELFIE RECIPE IN DB','warn');p.classList.remove('loading');return;}
+    if(fresh.recipes){current.recipes=fresh.recipes;renderRecipes();}
+    toast('PREVIEW · generating with DB recipe…','warn');
+    var body={model:recipe.model,prompt:recipe.positive_prompt};
+    if(recipe.negative_prompt) body.negative_prompt=recipe.negative_prompt;
+    var r=await apiFetch('/orch/img/v1/generate',{method:'POST',
+      headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    if(!r.ok){var eb=await _errBody(r,'GENERATE');throw new Error('generate HTTP '+r.status+(eb?' · '+eb.slice(0,80):''));}
+    var job=await r.json(),id=job.job_id,tries=0,done=null;
+    while(tries++<40){
+      await new Promise(function(s){setTimeout(s,2500);});
+      var jr=await apiFetch('/orch/img/v1/jobs/'+id,{}); var js=await jr.json();
+      if(js.status==='done'){done=js;break;}
+      if(js.status==='failed') throw new Error('gen failed server-side');
+    }
+    if(!done||!done.images||!done.images.length) throw new Error('no image after 40 polls');
+    var ir=await apiFetch('/orch/img/outputs/'+done.images[0],{});
+    if(!ir.ok) throw new Error('output HTTP '+ir.status);
+    var blob=await ir.blob();
+    applyPortraitBlob(blob);  // same path as the avatar bake reload
     toast('PREVIEW LOADED · public bake still old until re-bake','ok');
   }catch(e){
     p.classList.remove('loading');
