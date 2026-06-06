@@ -1159,10 +1159,16 @@ function clearRecipeNeg(variant){
 }
 
 // ── IMG MODELS LIST ──────────────────────────────────────────────────
-//  Best-effort fetch of the available image models from the backend,
-//  populates a shared <datalist id="imgModels"> referenced by every
-//  recipe model input. Falls back to a curated list if the endpoint
-//  is unavailable so the admin can still pick from the known set.
+//  Canonical endpoint: GET /orch/img/v1/models (admin scope).
+//  Response shape (per alean/aria/storiesbyjez canonical parser):
+//      j.data  → [{id:"modelName.safetensors"}, ...]   (OpenAI-compatible)
+//      j.all   → ["modelName.safetensors", ...]        (legacy)
+//      j.checkpoints → [...]                            (sd-webui style)
+//  Picks the first that's populated. Falls back to a curated list when
+//  the endpoint returns empty (e.g. before maniac advertises Juggernaut/
+//  cyberPony in the orch — see alean docs/app/index.html#fetchModels for
+//  the canonical reference).
+//  Admin scope = NO free-tier filter (jezabel admin can pick any model).
 var IMG_MODELS=[];
 var IMG_MODELS_FALLBACK=[
   'cyberrealisticPony_v110-001.safetensors',
@@ -1175,11 +1181,15 @@ async function loadImgModels(){
     var r=await apiFetch('/orch/img/v1/models',{method:'GET'});
     if(r.ok){
       var j=await r.json();
-      var arr=Array.isArray(j)?j:(j.models||j.items||j.data||[]);
-      got=arr.map(function(x){return typeof x==='string'?x:(x.name||x.id||x.model||'');}).filter(Boolean);
+      got = (j.data && j.data.map(function(m){return typeof m==='string'?m:(m.id||m.name||m.model||'');}))
+         || j.all
+         || j.checkpoints
+         || [];
+      got = got.filter(Boolean);
       if(got.length) toast('IMG MODELS: '+got.length+' AVAILABLE','ok');
-    }else if(r.status===404){
-      toast('IMG MODELS endpoint 404 — using fallback list','warn');
+      else toast('IMG MODELS: list empty — using fallback','warn');
+    }else{
+      toast('IMG MODELS HTTP '+r.status+' — using fallback','warn');
     }
   }catch(_){ /* network error → silent fallback */ }
   var seen={};
