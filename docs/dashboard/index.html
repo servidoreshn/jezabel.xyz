@@ -389,6 +389,28 @@ input,textarea{font-family:'Rajdhani',sans-serif}
 .dry-dismiss:hover{border-color:var(--cyan);color:var(--cyan)}
 .dry-fire:disabled,.dry-dismiss:disabled{opacity:0.45;cursor:wait}
 
+/* ── recipe edit mode v2: clearer labels + ✕ CLEAR affordance on negative ── */
+.recipe.editing .recipe-body .lbl{color:var(--cyan);font-size:10px;letter-spacing:2.5px;font-weight:800}
+.recipe.editing .recipe-body .lbl::after{content:' PROMPT'}
+.recipe.editing .recipe-body .col{position:relative;background:rgba(255,43,214,0.025);padding:6px 8px}
+.recipe.editing .recipe-body .col textarea.rw-textarea{
+  background:var(--void);border:1px solid var(--magenta-deep);
+  font-size:13px;line-height:1.6;color:var(--text);padding:10px 12px;
+  font-family:'Rajdhani',sans-serif;
+}
+.recipe.editing .recipe-body .col textarea.rw-textarea:focus{border-color:var(--magenta);box-shadow:0 0 0 1px rgba(255,43,214,0.25)}
+.recipe-neg-clear{
+  position:absolute;top:4px;right:6px;display:none;
+  font-family:'Orbitron',sans-serif;font-weight:700;font-size:8.5px;letter-spacing:2px;
+  color:var(--muted);background:transparent;border:1px solid var(--line);cursor:pointer;
+  text-transform:uppercase;padding:3px 7px;
+}
+.recipe-neg-clear:hover{color:var(--red);border-color:var(--red)}
+.recipe.editing .recipe-neg-clear{display:inline-flex}
+
+/* model field autocomplete — wider input with datalist */
+.recipe.editing .recipe-head .model-edit{width:100%;max-width:520px;font-family:'Rajdhani',sans-serif;font-size:12px}
+
 .bindings{display:flex;flex-direction:column;gap:8px}
 .binding{
   display:flex;align-items:center;gap:14px;padding:12px 16px;background:var(--void);border-left:3px solid var(--cyan);
@@ -832,6 +854,8 @@ if(IS_ADMIN){
   // loveDB editor — admin-only persona-data card editor + DRY-RUN intercept
   var _ec=document.getElementById('editorControls'); if(_ec) _ec.style.display='flex';
   var _rp=document.getElementById('roPill'); if(_rp) _rp.style.display='none';
+  // pull img models list so the recipe model input autocompletes
+  setTimeout(loadImgModels,80);
 }
 
 // ─ SAR1A / ORCH ─
@@ -1106,11 +1130,12 @@ function renderRecipes(){
           '<button class="cancel-mini" onclick="cancelRecipeEdit(\''+escAttr(v)+'\')">× CANCEL</button>'+
         '</div>' : '';
     var modelInput=editable
-      ? '<input class="rw-input model-edit" data-rv="'+escAttr(v)+'-model" type="text" value="'+escHtml(r.model||'')+'" placeholder="model.safetensors">' : '';
+      ? '<input class="rw-input model-edit" data-rv="'+escAttr(v)+'-model" type="text" list="imgModels" value="'+escHtml(r.model||'')+'" placeholder="model.safetensors — type or pick from ↓">' : '';
     var posEdit=editable
-      ? '<textarea class="rw-textarea" data-rv="'+escAttr(v)+'-pos" rows="4" placeholder="positive prompt">'+escHtml(r.positive_prompt||'')+'</textarea>' : '';
+      ? '<textarea class="rw-textarea" data-rv="'+escAttr(v)+'-pos" rows="5" placeholder="positive prompt">'+escHtml(r.positive_prompt||'')+'</textarea>' : '';
     var negEdit=editable
-      ? '<textarea class="rw-textarea" data-rv="'+escAttr(v)+'-neg" rows="3" placeholder="negative prompt">'+escHtml(r.negative_prompt||'')+'</textarea>' : '';
+      ? '<button class="recipe-neg-clear" type="button" onclick="clearRecipeNeg(\''+escAttr(v)+'\')" title="Clear to empty (sends negative_prompt: \"\")">× CLEAR</button>'+
+        '<textarea class="rw-textarea" data-rv="'+escAttr(v)+'-neg" rows="4" placeholder="negative prompt (or empty to skip)">'+escHtml(r.negative_prompt||'')+'</textarea>' : '';
     return '<div class="recipe" data-variant="'+escAttr(v)+'">'+
       '<div class="recipe-head"><span class="variant">'+escHtml(v)+'</span>'+
         '<span class="model">'+escHtml(r.model||'')+'</span>'+modelInput+ctrl+
@@ -1127,6 +1152,44 @@ function renderRecipes(){
   }).join('');
 }
 function escAttr(s){return String(s||'').replace(/&/g,'&amp;').replace(/'/g,'&apos;').replace(/"/g,'&quot;');}
+
+// quick-wipe helper for the negative-prompt clear affordance
+function clearRecipeNeg(variant){
+  var n=_recipeInput(variant,'neg'); if(n){n.value='';n.focus();}
+}
+
+// ── IMG MODELS LIST ──────────────────────────────────────────────────
+//  Best-effort fetch of the available image models from the backend,
+//  populates a shared <datalist id="imgModels"> referenced by every
+//  recipe model input. Falls back to a curated list if the endpoint
+//  is unavailable so the admin can still pick from the known set.
+var IMG_MODELS=[];
+var IMG_MODELS_FALLBACK=[
+  'cyberrealisticPony_v110-001.safetensors',
+  'Juggernaut-XL_v9_RunDiffusionPhoto_v2.safetensors',
+  'juggernautXL_v9Rdphoto2Lightning.safetensors',
+];
+async function loadImgModels(){
+  var got=[];
+  try{
+    var r=await apiFetch('/orch/img/v1/models',{method:'GET'});
+    if(r.ok){
+      var j=await r.json();
+      var arr=Array.isArray(j)?j:(j.models||j.items||j.data||[]);
+      got=arr.map(function(x){return typeof x==='string'?x:(x.name||x.id||x.model||'');}).filter(Boolean);
+      if(got.length) toast('IMG MODELS: '+got.length+' AVAILABLE','ok');
+    }else if(r.status===404){
+      toast('IMG MODELS endpoint 404 — using fallback list','warn');
+    }
+  }catch(_){ /* network error → silent fallback */ }
+  var seen={};
+  IMG_MODELS=got.concat(IMG_MODELS_FALLBACK).filter(function(m){if(seen[m])return false;seen[m]=1;return !!m;});
+  _renderImgModelsDatalist();
+}
+function _renderImgModelsDatalist(){
+  var dl=document.getElementById('imgModels'); if(!dl) return;
+  dl.innerHTML=IMG_MODELS.map(function(m){return '<option value="'+escAttr(m)+'">';}).join('');
+}
 
 // ──────────────────────────────────────────────────────────────────────
 //  loveDB editor — admin-only writes
@@ -1663,6 +1726,9 @@ wireHold('holdL',-1);wireHold('holdR',1);
   else if(myCompanions.length) mountDAE(myCompanions[0]);
 })();
 </script>
+
+<!-- IMG models list — populated by loadImgModels() on boot, referenced by every recipe model input -->
+<datalist id="imgModels"></datalist>
 
 <!-- DRY-RUN preview panel — fixed bottom-center, populated by _showDryRunAndWait -->
 <div class="dry-preview" id="dryPreview" role="dialog" aria-hidden="true">
