@@ -17,12 +17,19 @@
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%}
 body{
-  font-family:'Rajdhani',sans-serif;background:var(--black);color:var(--text);
+  font-family:'Rajdhani',sans-serif;background-color:var(--black);color:var(--text);
   font-size:15px;line-height:1.4;letter-spacing:0.3px;overflow:hidden;
   display:flex;align-items:center;justify-content:center;
-  background-image:
-    linear-gradient(135deg,#0a0c0e 0%,#0e1218 100%),
-    radial-gradient(ellipse at 80% -20%,rgba(255,41,41,0.08),transparent 50%),
+  background-image:url('../assets/jezabelCity.png');
+  background-size:cover;background-position:center;
+  background-attachment:fixed;background-repeat:no-repeat;
+}
+/* dark scrim — sits above bg image, below panel for legibility */
+.bg-scrim{
+  position:fixed;inset:0;pointer-events:none;z-index:1;
+  background:
+    linear-gradient(180deg,rgba(8,10,14,0.55) 0%,rgba(8,10,14,0.65) 50%,rgba(8,10,14,0.88) 100%),
+    radial-gradient(ellipse at 80% -20%,rgba(255,41,41,0.10),transparent 50%),
     radial-gradient(ellipse at 20% 120%,rgba(255,43,214,0.08),transparent 50%);
 }
 body::before{
@@ -90,6 +97,7 @@ input:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 1px var(--red)
 </style>
 </head>
 <body>
+<div class="bg-scrim"></div>
 <div class="panel">
   <div class="panel-top">
     <div class="brand">JEZABEL<span class="dot">.</span>XYZ</div>
