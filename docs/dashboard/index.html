@@ -735,8 +735,8 @@ input,textarea{font-family:'Rajdhani',sans-serif}
         </div>
         <div class="actions">
           <button class="action-btn" onclick="openChat()"><span class="ic">▶</span> CHAT</button>
-          <button class="action-btn magenta" onclick="testSelfie()" title="Reload current avatar bake (ETag revalidate)"><span class="ic">▶</span> SELFIE</button>
-          <button class="action-btn magenta admin-only" id="regenSelfieBtn" onclick="regenSelfiePreview()" title="Local regen with current recipe (bake stays untouched — preview only)" style="display:none"><span class="ic">↻</span> REGEN</button>
+          <button class="action-btn magenta" onclick="selfiePreviewFromForm()" title="Ephemeral preview of the in-editor selfie recipe — does NOT persist"><span class="ic">▶</span> SELFIE</button>
+          <button class="action-btn magenta admin-only" id="regenSelfieBtn" onclick="rebakeAvatar()" title="Rebake + PERSIST canonical avatar from the DB recipe (writes BOT_PROFILE_PICS)" style="display:none"><span class="ic">↻</span> REGEN</button>
           <button class="action-btn blue" onclick="testLiveness()"><span class="ic">▶</span> LIVENESS</button>
         </div>
       </div>
@@ -862,8 +862,8 @@ if(IS_ADMIN){
   var _rp=document.getElementById('roPill'); if(_rp) _rp.style.display='none';
   // pull img models list so the recipe model input autocompletes
   setTimeout(loadImgModels,80);
-  // REGEN PREVIEW — local /orch/img/v1/generate against current recipe so admin
-  // can eyeball recipe edits without waiting for the backend re-bake hook
+  // REGEN — admin-only rebake+persist of the canonical avatar (writes the DB
+  // bake via the backend rebake endpoint). SELFIE is the ephemeral form preview.
   var _rg=document.getElementById('regenSelfieBtn'); if(_rg) _rg.style.display='';
 }
 
@@ -1681,41 +1681,29 @@ async function genSelfie(d,nsfw,hint){
   var ir=await apiFetch('/orch/img/outputs/'+done.images[0],{});var blob=await ir.blob();
   return URL.createObjectURL(blob);
 }
-async function testSelfie(){
+// SELFIE PREVIEW — EPHEMERAL render from the recipe CURRENTLY IN THE EDITOR
+// (the in-form selfie-variant model + positive_prompt + negative_prompt). Tests
+// the UNSAVED recipe: POST /orch/img/v1/generate → poll → fetch → applyPortraitBlob.
+// Does NOT persist and does NOT re-fetch the DB. When the editor inputs aren't
+// rendered (non-admin view) it falls back to the LOADED recipe state in
+// current.recipes[selfie] — still not a DB re-fetch. The canonical bake served by
+// GET /love/v1/dae/<bot>/avatar is untouched; use REGEN to rebake + persist it.
+function _selfieFormVal(suffix){var e=_recipeInput('selfie',suffix);return e?(e.value||''):null;}
+async function selfiePreviewFromForm(){
   if(!current)return;
-  if(!current.profile_pic){toast('AVATAR BAKE PENDING — try REGEN to preview new recipe locally','warn');return;}
-  toast('RELOADING AVATAR…');
-  await ensureSelfiePortrait(current,true);  // force = cache:'no-cache' → ETag revalidate
-}
-// REGEN PREVIEW — re-runs /orch/img/v1/generate against the CURRENT recipe
-// (positive_prompt + negative_prompt + model from current.recipes[selfie]) so
-// admin sees the effect of recipe edits immediately. Does NOT touch the DB
-// bake — that's maniac's re-bake hook (POST /love/v1/dae/<bot>/avatar/rebake
-// pending). Toast makes the distinction loud so admin doesn't think the
-// public selfie has changed when it hasn't.
-async function regenSelfiePreview(){
-  if(!IS_ADMIN||!current)return;
   var p=document.getElementById('dPortrait');
-  var btn=document.getElementById('regenSelfieBtn');
-  if(btn)btn.disabled=true;
+  // Read the LIVE editor inputs first (freshest, unsaved). null = input not in DOM.
+  var fm=_selfieFormVal('model'), fp=_selfieFormVal('pos'), fn=_selfieFormVal('neg');
+  var base=recipeFor(current,'selfie')||{};
+  var model =(fm!==null?fm.trim():'') || base.model || IMG_SFW;
+  var prompt=(fp!==null?fp.trim():String(base.positive_prompt||'').trim());
+  var neg   =(fn!==null?fn.trim():String(base.negative_prompt||'').trim());
+  if(!prompt){toast('NO SELFIE PROMPT IN FORM/RECIPE','warn');return;}
   p.classList.add('loading');
-  toast('PREVIEW · pulling fresh recipe from DB…','warn');
+  toast('PREVIEW · testing unsaved recipe…','warn');
   try{
-    // CANONICAL FLOW per maniac's brief:
-    //   1. GET /love/v1/dae?bot=<id>  → fresh recipe from loveDB
-    //   2. find r.variant === 'selfie'
-    //   3. POST /orch/img/v1/generate { model, prompt, negative_prompt }
-    //   4. poll /orch/img/v1/jobs/<id>  → download /orch/img/outputs/<file>
-    // The fresh fetch guarantees we render with what's actually persisted,
-    // not whatever was in current.recipes after a local save.
-    var fresh=await fetchDAEByBot(current.bot);
-    if(!fresh){throw new Error('could not refetch dae '+current.bot);}
-    var recipe=(fresh.recipes||[]).find(function(x){return x.variant==='selfie';});
-    if(!recipe||!recipe.positive_prompt){toast('NO SELFIE RECIPE IN DB','warn');p.classList.remove('loading');return;}
-    if(fresh.recipes){current.recipes=fresh.recipes;renderRecipes();}
-    toast('PREVIEW · generating with DB recipe…','warn');
-    var body={model:recipe.model,prompt:recipe.positive_prompt};
-    if(recipe.negative_prompt) body.negative_prompt=recipe.negative_prompt;
+    var body={model:model,prompt:prompt};
+    if(neg) body.negative_prompt=neg;
     var r=await apiFetch('/orch/img/v1/generate',{method:'POST',
       headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
     if(!r.ok){var eb=await _errBody(r,'GENERATE');throw new Error('generate HTTP '+r.status+(eb?' · '+eb.slice(0,80):''));}
@@ -1730,11 +1718,39 @@ async function regenSelfiePreview(){
     var ir=await apiFetch('/orch/img/outputs/'+done.images[0],{});
     if(!ir.ok) throw new Error('output HTTP '+ir.status);
     var blob=await ir.blob();
-    applyPortraitBlob(blob);  // same path as the avatar bake reload
-    toast('PREVIEW LOADED · public bake still old until re-bake','ok');
+    applyPortraitBlob(blob);  // ephemeral: object URL only — never persisted
+    toast('PREVIEW · testing unsaved recipe','ok');
   }catch(e){
     p.classList.remove('loading');
-    toast('REGEN FAILED: '+(e.message||e),'err');console.error('regenSelfiePreview',e);
+    toast('PREVIEW FAILED: '+(e.message||e),'err');console.error('selfiePreviewFromForm',e);
+  }
+}
+// REGEN — REBAKE + PERSIST the canonical avatar. The SERVER pulls the bot's selfie
+// recipe from the DB, renders, and PERSISTS to BOT_PROFILE_PICS (what
+// GET /love/v1/dae/<bot>/avatar serves). Routed through _attemptWrite so the
+// DRY-RUN intercept covers it (POST is a write). On success we force-refetch the
+// avatar so the shown profile pic reflects the freshly persisted bake.
+// AGREED ENDPOINT (pending L live-confirm): POST /love/v1/dae/<bot>/avatar/rebake on
+// lunaOrchestrator @ ElevenDaat. If that endpoint doesn't yet persist, the backend
+// add is owed (see jezabel-selfie-regen DONE.md) — this frontend already points at it.
+async function rebakeAvatar(){
+  if(!IS_ADMIN||!current||!current.bot){toast('NO TARGET','warn');return;}
+  var p=document.getElementById('dPortrait');
+  var btn=document.getElementById('regenSelfieBtn');
+  if(btn)btn.disabled=true;
+  p.classList.add('loading');
+  toast('REBAKING AVATAR · persisting from DB recipe…','warn');
+  try{
+    var path='/love/v1/dae/'+current.bot+'/avatar/rebake';
+    var r=await _attemptWrite('POST',path,{bot:current.bot});
+    if(r && r.dryRunCancelled){toast('DRY-RUN · REBAKE DISMISSED','warn');p.classList.remove('loading');return;}
+    if(!r.ok){var eb=await _errBody(r,'REBAKE');_toastForStatus('REBAKE',r.status,eb);p.classList.remove('loading');return;}
+    // refresh the shown profile pic from the freshly persisted bake (no-cache pull)
+    await ensureSelfiePortrait(current,true);  // force = cache:'no-cache' → new bytes
+    toast('AVATAR REBAKED','ok');
+  }catch(e){
+    p.classList.remove('loading');
+    toast('REBAKE FAILED: '+(e.message||e),'err');console.error('rebakeAvatar',e);
   }finally{if(btn)btn.disabled=false;}
 }
 async function testLiveness(){
