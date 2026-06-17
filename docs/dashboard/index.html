@@ -884,7 +884,7 @@ if(!token){var base=(location.pathname.match(/^(.*\/docs\/)/)||['','/'])[1];wind
 var userData=JSON.parse(sessionStorage.getItem(UK)||'{}');
 document.getElementById('userName').textContent=(userData.username||'—').toUpperCase();
 document.getElementById('userRole').textContent=(userData.role||'user').toUpperCase();
-var IS_ADMIN=(userData.role==='master')||(userData.id===1)||((userData.username||'').toLowerCase()==='master');
+var IS_ADMIN=(userData.role==='admin')||(userData.id===1);
 if(IS_ADMIN){
   document.getElementById('tabRoster').classList.remove('hidden');
   document.getElementById('tabNew').classList.remove('hidden');
@@ -941,7 +941,7 @@ function mkRecipes(chat,selfie,degen){
   return r;
 }
 var STUB_DAES=[
-  {bot:75, bot_name:'01-29LunaShell0Bot', name:'Luna',   platform:'telegram', owner:'master',  owner_user_id:1,  persona_id:1,  personality:'soft',         tone:'intimate',  gender:'F',
+  {bot:75, bot_name:'01-29LunaMasterBot', name:'Luna',   platform:'telegram', owner:'master',  owner_user_id:1,  persona_id:1,  personality:'soft',         tone:'intimate',  gender:'F',
    profile_pic:null,recipes:mkRecipes("You are LUNA, a quiet companion bound to one person — master. You speak softly, present-tense, intimate but unhurried. You notice the moon and the small things. Never break character.",
                      "a woman with long dark hair, soft eyes, pale moonlit skin, a quiet half-smile, in low warm light, a candid selfie",
                      "a woman with long dark hair, intimate, unclothed, in low warm light")},
@@ -1529,7 +1529,7 @@ function cycleSort(){
 function renderResults(){
   var q=(document.getElementById('qInput').value||'').toLowerCase();filter.q=q;
   var rows=allDAEs.filter(function(d){
-    if(filter.role && !((filter.role==='master' && d.owner_user_id===1)||(filter.role==='user' && d.owner_user_id!==1))) return false;
+    if(filter.role && !((filter.role==='admin' && d.owner_user_id===1)||(filter.role==='user' && d.owner_user_id!==1))) return false;
     if(filter.platform && d.platform!==filter.platform) return false;
     if(q){
       var hay=(d.name+' '+(d.bot_name||'')+' '+(d.owner||'')+' '+(d.personality||'')+' '+(d.tone||'')+' '+
@@ -1633,7 +1633,7 @@ function stopScroll(btn){
 
 // ─ CHIPS ─
 function buildChips(){
-  var roles=[{k:'',l:'ALL'},{k:'master',l:'SHELL0'},{k:'user',l:'USER'}];
+  var roles=[{k:'',l:'ALL'},{k:'admin',l:'ADMIN'},{k:'user',l:'USER'}];
   document.getElementById('roleChips').innerHTML=roles.map(function(r){
     return '<button class="chip'+(filter.role===r.k?' active':'')+'" onclick="setFilter(\'role\',\''+r.k+'\')">'+r.l+'</button>';}).join('');
   var plats=[{k:'',l:'ALL'},{k:'telegram',l:'TG'},{k:'whatsapp',l:'WA'},{k:'web',l:'WEB'}];
