@@ -882,9 +882,10 @@ var TK='jezabelxyz_token', UK='jezabelxyz_user';
 var token=sessionStorage.getItem(TK);
 if(!token){var base=(location.pathname.match(/^(.*\/docs\/)/)||['','/'])[1];window.location.replace(base+'login/');}
 var userData=JSON.parse(sessionStorage.getItem(UK)||'{}');
-document.getElementById('userName').textContent=(userData.username||'—').toUpperCase();
-document.getElementById('userRole').textContent=(userData.role||'user').toUpperCase();
-var IS_ADMIN=(userData.role==='admin')||(userData.id===1);
+// Defensive admin check: check all possible claim names from the JWT payload
+var IS_ADMIN=(userData.role==='admin')||(userData.tier==='admin')||(userData.id===1)||(userData.user_id===1)||(userData.sub==='master');
+document.getElementById('userName').textContent=(userData.username||userData.sub||'—').toUpperCase();
+document.getElementById('userRole').textContent=(userData.role||userData.tier||'user').toUpperCase();
 if(IS_ADMIN){
   document.getElementById('tabRoster').classList.remove('hidden');
   document.getElementById('tabNew').classList.remove('hidden');
