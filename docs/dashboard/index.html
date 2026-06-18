@@ -882,22 +882,29 @@ var TK='jezabelxyz_token', UK='jezabelxyz_user';
 var token=sessionStorage.getItem(TK);
 if(!token){var base=(location.pathname.match(/^(.*\/docs\/)/)||['','/'])[1];window.location.replace(base+'login/');}
 var userData=JSON.parse(sessionStorage.getItem(UK)||'{}');
-// Defensive admin check: check all possible claim names from the JWT payload
-var IS_ADMIN=(userData.role==='admin')||(userData.tier==='admin')||(userData.id===1)||(userData.user_id===1)||(userData.sub==='master');
+// The JWT is the real identity — decode it and merge over the stored object so role/id
+// are present even if login stored only {username}. (Belt-and-suspenders w/ login.)
+try{var _c=JSON.parse(atob(token.split('.')[1]));userData=Object.assign({},userData,_c);
+    sessionStorage.setItem(UK,JSON.stringify(userData));}catch(e){}
 document.getElementById('userName').textContent=(userData.username||userData.sub||'—').toUpperCase();
-document.getElementById('userRole').textContent=(userData.role||userData.tier||'user').toUpperCase();
-if(IS_ADMIN){
-  document.getElementById('tabRoster').classList.remove('hidden');
-  document.getElementById('tabNew').classList.remove('hidden');
-  // loveDB editor — admin-only persona-data card editor + DRY-RUN intercept
-  var _ec=document.getElementById('editorControls'); if(_ec) _ec.style.display='flex';
-  var _rp=document.getElementById('roPill'); if(_rp) _rp.style.display='none';
-  // pull img models list so the recipe model input autocompletes
-  setTimeout(loadImgModels,80);
-  // REGEN — admin-only rebake+persist of the canonical avatar (writes the DB
-  // bake via the backend rebake endpoint). SELFIE is the ephemeral form preview.
-  var _rg=document.getElementById('regenSelfieBtn'); if(_rg) _rg.style.display='';
+// Best-effort admin from JWT claims (instant paint). The SERVER is the real gate (below).
+function _claimAdmin(d){return d.role==='admin'||d.tier==='admin'||d.is_admin===true||d.id===1||d.user_id===1||d.sub==='master';}
+var IS_ADMIN=_claimAdmin(userData);
+function applyAdmin(){
+  document.getElementById('userRole').textContent=(IS_ADMIN?'admin':(userData.role||userData.tier||'user')).toUpperCase();
+  document.getElementById('tabRoster').classList.toggle('hidden',!IS_ADMIN);
+  document.getElementById('tabNew').classList.toggle('hidden',!IS_ADMIN);
+  var _ec=document.getElementById('editorControls'); if(_ec) _ec.style.display=IS_ADMIN?'flex':'none';
+  var _rp=document.getElementById('roPill'); if(_rp) _rp.style.display=IS_ADMIN?'none':'';
+  var _rg=document.getElementById('regenSelfieBtn'); if(_rg) _rg.style.display=IS_ADMIN?'':'none';
+  if(IS_ADMIN) setTimeout(loadImgModels,80);
 }
+applyAdmin();
+// AUTHORITATIVE admin = the server's call. GET /love/v1/daes → 200 for admin, 403 else.
+// Promote/demote on a definitive answer; keep the JWT best-effort if the check errors.
+(async function(){try{var r=await apiFetch('/love/v1/daes',{method:'GET'});
+  var srv=r.status===200?true:(r.status===403?false:null);
+  if(srv!==null&&srv!==IS_ADMIN){IS_ADMIN=srv;applyAdmin();}}catch(e){}})();
 
 // ─ SAR1A / ORCH ─
 var SAR1A='https://sar1a.lempyra.com';

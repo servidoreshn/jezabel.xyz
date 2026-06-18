@@ -135,7 +135,11 @@ async function doLogin(){
     var r2=await fetch(AUTH.url+'/auth/token',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({grant_type:'authorization_code',code:code,client_id:AUTH.clientId,client_secret:p})});
     var d2=await r2.json();if(!r2.ok)throw new Error(d2.detail||'token failed');
     sessionStorage.setItem(AUTH.tokenKey,d2.access_token);
-    sessionStorage.setItem(AUTH.userKey,JSON.stringify({username:u}));
+    // The JWT payload IS the identity (sub/role/id/exp). Store it so the dashboard
+    // sees role/id, not just the typed username. Falls back to {username} if undecodable.
+    try{var _c=JSON.parse(atob(d2.access_token.split('.')[1]));
+        sessionStorage.setItem(AUTH.userKey,JSON.stringify(Object.assign({username:u},_c)));}
+    catch(e){sessionStorage.setItem(AUTH.userKey,JSON.stringify({username:u}));}
     st.className='status ok';st.textContent='⟨ ACCESS GRANTED ⟩\n⟨ LOADING DAE GRID… ⟩';
     setTimeout(function(){window.location.replace('../dashboard/');},600);
   }catch(e){st.className='status err';st.textContent='⟨ '+(e.message||e).toUpperCase()+' ⟩';btn.disabled=false;}
